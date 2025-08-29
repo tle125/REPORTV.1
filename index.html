@@ -4,13 +4,11 @@
 <link rel="icon" type="image/png" href="https://img.icons8.com/?size=64&id=xVnReHOxsQVt&format=png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard รายงานภาพรวม</title>
+    <title>รายงานค่าใช้จ่าย Material handling</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
-        .tab-active { border-color: #2563eb; color: #1e40af; }
-        .tab-inactive { border-color: transparent; color: #475569; }
         .pagination-btn { transition: background-color: 0.2s; }
         .pagination-btn-active { background-color: #2563eb; color: white; }
         .pagination-btn-inactive { background-color: white; color: #374151; }
@@ -36,7 +34,7 @@
             overflow-y: auto;
         }
         
-        /* From Uiverse.io by JaydipPrajapati1910 & akshat-patel28 */
+        /* Refresh Button */
         .refresh-button {
           color: white;
           background-color: #222;
@@ -72,10 +70,11 @@
           animation: spin_357 0.5s linear;
         }
         
+        /* Main Nav */
         .button-container {
           display: flex;
           background-color: rgb(27, 133, 219);
-          width: 280px;
+          width: 540px; /* Increased width for new button */
           height: 60px;
           align-items: center;
           justify-content: space-around;
@@ -122,6 +121,90 @@
             transform: rotate(360deg);
           }
         }
+        
+        /* New Radio Tabs for RepairApp */
+        .radio-input {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          background-color: #e2e8f0;
+          padding: 4px;
+          border-radius: 10px;
+        }
+
+        .radio-input input {
+          display: none;
+        }
+
+        .radio-input .label {
+          flex: 1 1 auto;
+          min-width: 120px;
+          height: 50px;
+          background-color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          transition: all 0.15s ease-in-out;
+          cursor: pointer;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .radio-input .label:has(input[type="radio"]:checked) {
+          background-color: #2563eb;
+          box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .radio-input .label .text {
+          color: #334155;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.15s ease-in-out;
+        }
+
+        .radio-input .label:has(input[type="radio"]:checked) .text {
+          color: white;
+        }
+
+        /* Tooltip styles */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip-icon {
+            cursor: pointer;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            width: 320px;
+            background-color: #334155;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -160px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #334155 transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
 
         /* Mobile adjustments */
         @media (max-width: 768px) {
@@ -162,8 +245,8 @@
                 border-top: 1px solid #e2e8f0;
             }
             .button-container {
-                width: 90%;
-                max-width: 300px;
+                width: 100%;
+                max-width: 540px;
             }
         }
     </style>
@@ -177,6 +260,9 @@
     }
     </script>
     
+    <!-- Lottie Animation Player -->
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
+
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -242,7 +328,7 @@
             return number.toLocaleString('th-TH', { minimumFractionDigits: digits, maximumFractionDigits: digits });
         };
         const formatPrice = (price) => formatNumber(price, 2);
-        const getThaiMonthName = (monthIndex) => ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][monthIndex];
+        const getThaiMonthName = (monthIndex) => ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'][monthIndex];
         const calculateTotalSparePartsPrice = (priceString) => {
             if (!priceString) return 0;
             return String(priceString).split(/[,;|+]/).map(p => parseFloat(p.trim())).filter(p => !isNaN(p)).reduce((sum, current) => sum + current, 0);
@@ -337,6 +423,8 @@
                 up: <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3l7.5 7.5" />,
                 down: <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21l-7.5-7.5" />,
                 balance: <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25h7.5M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />,
+                impact: <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1-8.414 1.414M2.25 18 18 2.25M12 21V9M15.75 21v-5.25M8.25 21v-5.25" />,
+                calculator: <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm3-6h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm3-6h.008v.008H14.25v-.008zm0 3h.008v.008H14.25v-.008zM4.5 3.75v16.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V3.75m-15 0h15M4.5 3.75a2.25 2.25 0 012.25-2.25h10.5a2.25 2.25 0 012.25 2.25" />
             };
             return <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>{iconPaths[name]}</svg>;
         };
@@ -380,7 +468,7 @@
             );
         };
         const PaginatedDataTable = ({ title, data, columns }) => {
-            const ITEMS_PER_PAGE = 20;
+            const ITEMS_PER_PAGE = 10;
             const [currentPage, setCurrentPage] = useState(1);
             useEffect(() => { setCurrentPage(1); }, [data]);
             const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
@@ -398,10 +486,10 @@
                             </thead>
                             <tbody>
                                 {currentData.map((row, index) => (
-                                    <tr key={index} className="bg-white border-b hover:bg-gray-50">
+                                    <tr key={startIndex + index} className="bg-white border-b hover:bg-gray-50">
                                         {columns.map(col => (
                                             <td key={col.key} className="px-6 py-4 whitespace-nowrap">
-                                                {col.render ? col.render(row[col.key]) : row[col.key]}
+                                                {col.render ? col.render(row[col.key], row, startIndex + index) : row[col.key]}
                                             </td>
                                         ))}
                                     </tr>
@@ -513,7 +601,47 @@
             const groupedData = useMemo(() => Object.entries(groupDataByMonth(filteredData)).sort(([keyA], [keyB]) => new Date(keyB.split('-')[0], keyB.split('-')[1]) - new Date(keyA.split('-')[0], keyA.split('-')[1])), [filteredData]);
             const toggleMonth = (monthKey) => setExpandedMonths(prev => { const newSet = new Set(prev); if (newSet.has(monthKey)) newSet.delete(monthKey); else newSet.add(monthKey); return newSet; });
             const totalCost = useMemo(() => filteredData.reduce((sum, item) => sum + calculateTotalCost(item), 0), [filteredData]);
-            return (<div><div className="mb-4 sm:mb-6"><div className="flex flex-col sm:flex-row gap-2 sm:gap-4"><input type="text" placeholder="ค้นหา..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto" /><select value={filterType} onChange={e => setFilterType(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"><option value="">ทุกประเภท</option>{uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}</select><select value={filterYear} onChange={e => setFilterYear(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"><option value="">ทุกปี</option>{uniqueYears.map(y => <option key={y} value={y}>{y}</option>)}</select></div></div><div id="monthlyDataContainer">{groupedData.length > 0 ? groupedData.map(([key, group]) => (<MonthGroupSection key={key} group={group} isMobile={isMobile} isExpanded={expandedMonths.has(key)} onToggle={() => toggleMonth(key)} />)) : <div className="text-center py-8 text-gray-500">ไม่พบข้อมูล</div>}</div><div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm sm:text-base"><div><span className="font-semibold">{filteredData.length}</span> รายการ</div><div>ราคารวม: <span className="font-semibold">{formatPrice(totalCost)}</span> บาท</div></div></div>);
+
+            const searchColumns = [
+                { key: 'ลำดับที่', label: 'ลำดับที่', render: (val, row, index) => index + 1 },
+                { key: 'เบอร์รถ', label: 'เบอร์รถ' },
+                { key: 'รายการซ่อม', label: 'รายการซ่อม' },
+                { key: 'ประเภท', label: 'ประเภท' },
+                { key: 'วันที่แจ้งซ่อม(APP)', label: 'วันที่แจ้งซ่อม', render: (val) => formatDate(val) },
+                { key: 'ซ่อมเสร็จ(APP)', label: 'ซ่อมเสร็จ', render: (val) => formatDate(val) },
+                { key: 'ราคา', label: 'ค่าซ่อม', render: (val) => formatPrice(val) },
+                { key: 'ราคาอะไหล่', label: 'ค่าอะไหล่', render: (val) => formatPrice(calculateTotalSparePartsPrice(val)) },
+                { key: 'total', label: 'รวม', render: (val, row) => formatPrice(calculateTotalCost(row)) },
+            ];
+
+            return (
+                <div>
+                    <div className="mb-4 sm:mb-6">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                            <input type="text" placeholder="ค้นหา..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto" />
+                            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"><option value="">ทุกประเภท</option>{uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                            <select value={filterYear} onChange={e => setFilterYear(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"><option value="">ทุกปี</option>{uniqueYears.map(y => <option key={y} value={y}>{y}</option>)}</select>
+                        </div>
+                    </div>
+                    
+                    {searchTerm ? (
+                        <PaginatedDataTable
+                            title={`ผลการค้นหาสำหรับ "${searchTerm}"`}
+                            data={filteredData}
+                            columns={searchColumns}
+                        />
+                    ) : (
+                        <div id="monthlyDataContainer">
+                            {groupedData.length > 0 ? groupedData.map(([key, group]) => (<MonthGroupSection key={key} group={group} isMobile={isMobile} isExpanded={expandedMonths.has(key)} onToggle={() => toggleMonth(key)} />)) : <div className="text-center py-8 text-gray-500">ไม่พบข้อมูล</div>}
+                        </div>
+                    )}
+
+                    <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm sm:text-base">
+                        <div><span className="font-semibold">{filteredData.length}</span> รายการ</div>
+                        <div>ราคารวม: <span className="font-semibold">{formatPrice(totalCost)}</span> บาท</div>
+                    </div>
+                </div>
+            );
         };
         const WeeklyTab = ({ data, isMobile }) => {
             const today = new Date();
@@ -796,13 +924,163 @@
                 </div>
             );
         };
+        
+        const ComparisonTab = ({ data }) => {
+            const today = new Date();
+            const [selectedVehicle, setSelectedVehicle] = useState('');
+            const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+            const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
+
+            const { uniqueVehicles, uniqueYears } = useMemo(() => {
+                const vehicles = new Set();
+                const years = new Set();
+                data.forEach(item => {
+                    if (item['เบอร์รถ']) vehicles.add(item['เบอร์รถ']);
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    if (date) years.add(date.getFullYear());
+                });
+                return {
+                    uniqueVehicles: Array.from(vehicles).sort(),
+                    uniqueYears: Array.from(years).sort((a, b) => b - a)
+                };
+            }, [data]);
+
+            const comparisonData = useMemo(() => {
+                if (!selectedVehicle) return null;
+
+                const vehicleData = data.filter(item => item['เบอร์รถ'] === selectedVehicle);
+
+                const currentMonthData = vehicleData.filter(item => {
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    return date && date.getFullYear() === selectedYear && date.getMonth() === selectedMonth;
+                });
+                const currentMonthTotal = currentMonthData.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+
+                const prevMonthDate = new Date(selectedYear, selectedMonth, 1);
+                prevMonthDate.setMonth(prevMonthDate.getMonth() - 1);
+                const prevMonth = prevMonthDate.getMonth();
+                const prevYear = prevMonthDate.getFullYear();
+
+                const previousMonthData = vehicleData.filter(item => {
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    return date && date.getFullYear() === prevYear && date.getMonth() === prevMonth;
+                });
+                const previousMonthTotal = previousMonthData.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                
+                const difference = currentMonthTotal - previousMonthTotal;
+
+                return {
+                    currentMonthData,
+                    previousMonthData,
+                    currentMonthTotal,
+                    previousMonthTotal,
+                    difference,
+                    prevMonth,
+                    prevYear
+                };
+            }, [data, selectedVehicle, selectedYear, selectedMonth]);
+
+            const RepairDetailTable = ({ title, items }) => (
+                <div>
+                    <h3 className="text-md font-semibold text-slate-700 mb-2">{title}</h3>
+                    <div className="overflow-x-auto border rounded-lg bg-white shadow-sm">
+                        <table className="w-full text-sm">
+                            <thead className="bg-slate-100">
+                                <tr>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-600">วันที่</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-600">รายการ</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-600">ประเภท</th>
+                                    <th className="px-4 py-2 text-right font-medium text-slate-600">ต้นทุนรวม</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.length > 0 ? items.map((item, index) => (
+                                    <tr key={index} className="border-t">
+                                        <td className="px-4 py-2 text-slate-600 whitespace-nowrap">{formatDate(item['วันที่แจ้งซ่อม(APP)'])}</td>
+                                        <td className="px-4 py-2 text-slate-700">{item['รายการซ่อม']}</td>
+                                        <td className="px-4 py-2 text-slate-600">{item['ประเภท']}</td>
+                                        <td className="px-4 py-2 text-right font-semibold text-emerald-700">{formatPrice(calculateTotalCost(item))}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="4" className="text-center py-4 text-slate-500">ไม่พบข้อมูล</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div>
+                    <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2">
+                        <select value={selectedVehicle} onChange={e => setSelectedVehicle(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="">-- เลือกเบอร์รถ --</option>
+                            {uniqueVehicles.map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                        <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
+                            {uniqueYears.map(y => <option key={y} value={y}>{y + 543}</option>)}
+                        </select>
+                        <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
+                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][i]}</option>)}
+                        </select>
+                    </div>
+
+                    {!selectedVehicle ? (
+                        <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow">
+                            กรุณาเลือกเบอร์รถเพื่อดูการเปรียบเทียบ
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <SummaryCard 
+                                    title={`ยอดซ่อม ${['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][selectedMonth]} ${selectedYear + 543}`}
+                                    value={formatPrice(comparisonData.currentMonthTotal)}
+                                    unit="บาท"
+                                    icon={<Icons name="balance" />}
+                                    color={{ bg: 'bg-blue-100', icon: 'text-blue-600', border: 'border-blue-500' }}
+                                />
+                                <SummaryCard 
+                                    title={`ยอดซ่อม ${['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][comparisonData.prevMonth]} ${comparisonData.prevYear + 543}`}
+                                    value={formatPrice(comparisonData.previousMonthTotal)}
+                                    unit="บาท"
+                                    icon={<Icons name="balance" />}
+                                    color={{ bg: 'bg-gray-100', icon: 'text-gray-600', border: 'border-gray-400' }}
+                                />
+                                <SummaryCard 
+                                    title="ผลต่าง"
+                                    value={formatPrice(comparisonData.difference)}
+                                    unit="บาท"
+                                    icon={comparisonData.difference >= 0 ? <Icons name="up"/> : <Icons name="down"/>}
+                                    color={comparisonData.difference >= 0 ? 
+                                        { bg: 'bg-red-100', icon: 'text-red-600', border: 'border-red-500' } : 
+                                        { bg: 'bg-green-100', icon: 'text-green-600', border: 'border-green-500' }}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <RepairDetailTable title={`รายการซ่อมเดือน ${['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][selectedMonth]}`} items={comparisonData.currentMonthData} />
+                                <RepairDetailTable title={`รายการซ่อมเดือน ${['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][comparisonData.prevMonth]}`} items={comparisonData.previousMonthData} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
 
         // ##################################################################
         // ### REPAIR APP MAIN COMPONENT (คอมโพเนนต์หลักของแอปแจ้งซ่อม) ###
         // ##################################################################
         const RepairApp = ({ data, isMobile }) => {
             const [activeTab, setActiveTab] = useState('all');
-            const tabConfig = [ { id: 'all', label: 'ข้อมูลทั้งหมด' }, { id: 'weekly', label: 'รายสัปดาห์' }, { id: 'type', label: 'สรุปประเภท' }, { id: 'vehicle', label: 'สถิติรถ' }];
+            const tabConfig = [ 
+                { id: 'all', label: 'ข้อมูลทั้งหมด' }, 
+                { id: 'weekly', label: 'รายสัปดาห์' }, 
+                { id: 'type', label: 'สรุปประเภท' }, 
+                { id: 'vehicle', label: 'สถิติรถ' },
+                { id: 'comparison', label: 'เปรียบเทียบรายคัน' }
+            ];
             const renderContent = () => {
                 if (!data || data.length === 0) return <div className="text-center py-8 text-gray-500">ไม่พบข้อมูลการแจ้งซ่อม</div>;
                 switch (activeTab) {
@@ -810,16 +1088,25 @@
                     case 'weekly': return <WeeklyTab data={data} isMobile={isMobile} />;
                     case 'type': return <TypeTab data={data} isMobile={isMobile} />;
                     case 'vehicle': return <VehicleTab data={data} isMobile={isMobile} />;
+                    case 'comparison': return <ComparisonTab data={data} />;
                     default: return null;
                 }
             };
             return (
                 <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6">
-                    <div className="flex border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
+                    <div className="radio-input mb-4 sm:mb-6">
                         {tabConfig.map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-2 px-3 sm:px-4 font-medium whitespace-nowrap text-sm sm:text-base border-b-2 ${activeTab === tab.id ? 'tab-active' : 'tab-inactive'}`}>
-                                {tab.label}
-                            </button>
+                            <label className="label" key={tab.id}>
+                                <input
+                                    value={tab.id}
+                                    name="repair-tab-radio"
+                                    id={`tab-${tab.id}`}
+                                    type="radio"
+                                    checked={activeTab === tab.id}
+                                    onChange={() => setActiveTab(tab.id)}
+                                />
+                                <span className="text">{tab.label}</span>
+                            </label>
                         ))}
                     </div>
                     {renderContent()}
@@ -830,6 +1117,145 @@
         // ##################################################################
         // ### FUEL APP COMPONENTS (START) ###
         // ##################################################################
+        const FuelLast7DaysTab = ({ fuelOutData, fuelInData }) => {
+            const [expandedDates, setExpandedDates] = useState(new Set());
+
+            const { groupedByDate, chartData } = useMemo(() => {
+                const today = new Date();
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(today.getDate() - 7);
+
+                const filterAndSortData = (data, type) =>
+                    (data || [])
+                        .filter(item => {
+                            const date = parseDate(item['วันที่']);
+                            return date && date >= sevenDaysAgo && date <= today;
+                        })
+                        .map(item => ({ ...item, ประเภท: type }));
+
+                const filteredOut = filterAndSortData(fuelOutData, 'เบิกออก');
+                const filteredIn = filterAndSortData(fuelInData, 'รับเข้า');
+                const allData = [...filteredOut, ...filteredIn];
+
+                const grouped = allData.reduce((acc, item) => {
+                    const dateKey = parseDate(item['วันที่']).toISOString().split('T')[0];
+                    if (!acc[dateKey]) {
+                        acc[dateKey] = { items: [], totalOut: 0, totalIn: 0 };
+                    }
+                    acc[dateKey].items.push(item);
+                    if(item.ประเภท === 'เบิกออก') {
+                        acc[dateKey].totalOut += parseFloat(item['ราคาน้ำมัน']) || 0;
+                    } else {
+                        acc[dateKey].totalIn += parseFloat(item['ราคาน้ำมัน']) || 0;
+                    }
+                    return acc;
+                }, {});
+
+                const sortedGrouped = Object.entries(grouped).sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA));
+
+                const vehicleStats = {};
+                filteredOut.forEach(item => {
+                    const plate = item['เบอร์รถ'] || 'ไม่ระบุ';
+                    const cost = parseFloat(item['ราคาน้ำมัน']) || 0;
+                    if (!vehicleStats[plate]) vehicleStats[plate] = { total: 0, count: 0 };
+                    vehicleStats[plate].total += cost;
+                    vehicleStats[plate].count++;
+                });
+
+                const finalChartData = Object.entries(vehicleStats).map(([plate, stats]) => ({
+                    label: plate,
+                    value: stats.total,
+                    displayValue: formatPrice(stats.total)
+                })).sort((a, b) => b.value - a.value);
+
+                return { groupedByDate: sortedGrouped, chartData: finalChartData };
+            }, [fuelOutData, fuelInData]);
+
+            useEffect(() => {
+                if (groupedByDate.length > 0) {
+                    const latestDateKey = groupedByDate[0][0];
+                    setExpandedDates(new Set([latestDateKey]));
+                }
+            }, [groupedByDate]);
+
+            const toggleDate = (dateKey) => {
+                setExpandedDates(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(dateKey)) {
+                        newSet.delete(dateKey);
+                    } else {
+                        newSet.add(dateKey);
+                    }
+                    return newSet;
+                });
+            };
+
+            return (
+                <div>
+                    <h2 className="text-lg font-semibold mb-4 text-slate-800">
+                        รายการน้ำมัน 7 วันล่าสุด
+                    </h2>
+
+                    <div className="overflow-x-auto bg-white rounded-lg shadow-md p-4 mb-6">
+                        <table className="w-full text-sm">
+                            <thead className="bg-slate-100">
+                                <tr>
+                                    <th className="px-3 py-2 text-left font-medium text-slate-600">วันที่</th>
+                                    <th className="px-3 py-2 text-left font-medium text-slate-600">ประเภท</th>
+                                    <th className="px-3 py-2 text-left font-medium text-slate-600">ทะเบียนรถ</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ปริมาณ (ลิตร)</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ราคา (บาท)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {groupedByDate.map(([dateKey, data]) => {
+                                    const isExpanded = expandedDates.has(dateKey);
+                                    return (
+                                        <React.Fragment key={dateKey}>
+                                            <tr className="bg-slate-50 border-t-2 border-slate-200 cursor-pointer hover:bg-slate-100" onClick={() => toggleDate(dateKey)}>
+                                                <td className="px-3 py-2 font-semibold text-slate-700" colSpan="3">
+                                                    <div className="flex items-center">
+                                                        <span className={`transform transition-transform duration-200 mr-2 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}><Icons name="chevronDown" className="h-4 w-4" /></span>
+                                                        {formatDate(dateKey)}
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-2 text-right font-semibold text-green-600">+{formatPrice(data.totalIn)}</td>
+                                                <td className="px-3 py-2 text-right font-semibold text-red-600">-{formatPrice(data.totalOut)}</td>
+                                            </tr>
+                                            {isExpanded && data.items.map((row, idx) => (
+                                                <tr key={idx} className="border-t">
+                                                    <td className="px-3 py-2 pl-8 text-slate-500 text-xs">{formatTime(row['เวลา'])}</td>
+                                                    <td className="px-3 py-2">
+                                                        <span className={`px-2 py-1 text-xs rounded-full ${row['ประเภท'] === 'เบิกออก' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                                            {row['ประเภท']}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 text-slate-700">{row['เบอร์รถ'] || '-'}</td>
+                                                    <td className="px-3 py-2 text-right text-slate-600">
+                                                        {row['ประเภท'] === 'เบิกออก'
+                                                            ? formatNumber(row['จ่ายออก /ลิตร'])
+                                                            : formatNumber(row['รับเข้า'])}
+                                                    </td>
+                                                    <td className="px-3 py-2 text-right font-semibold text-emerald-600">
+                                                        {formatPrice(row['ราคาน้ำมัน'])}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <BarChart
+                        data={chartData}
+                        color="bg-indigo-500"
+                        title="มูลค่าน้ำมันตามทะเบียนรถ (เบิกออก - 7 วันล่าสุด)"
+                    />
+                </div>
+            );
+        };
         const FuelCharts = ({ supplyData }) => {
             const { dieselPriceChart, dieselLiterChart, benzenePriceChart, benzeneLiterChart } = useMemo(() => {
                 if (!supplyData || supplyData.length === 0) {
@@ -1085,7 +1511,7 @@
         };
 
         const FuelApp = ({ data }) => {
-            const [activeTab, setActiveTab] = useState('supply');
+            const [activeTab, setActiveTab] = useState('last7days');
             const [selectedYear, setSelectedYear] = useState('all');
             const [selectedMonth, setSelectedMonth] = useState('all');
 
@@ -1246,7 +1672,7 @@
                         </select>
                         <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md" disabled={selectedYear === 'all'}>
                             <option value="all">ทุกเดือน</option>
-                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{getThaiMonthName(i)}</option>)}
+                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][i]}</option>)}
                         </select>
                     </div>
 
@@ -1285,14 +1711,18 @@
                     </div>
 
                     <div className="flex border-b border-gray-200 mt-8 mb-4 sm:mb-6 overflow-x-auto">
-                        <button onClick={() => setActiveTab('supply')} className={`py-2 px-3 sm:px-4 font-medium whitespace-nowrap text-sm sm:text-base border-b-2 ${activeTab === 'supply' ? 'tab-active' : 'tab-inactive'}`}>
+                        <button onClick={() => setActiveTab('last7days')} className={`py-2 px-3 sm:px-4 font-medium whitespace-nowrap text-sm sm:text-base border-b-2 ${activeTab === 'last7days' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                            7 วันล่าสุด
+                        </button>
+                        <button onClick={() => setActiveTab('supply')} className={`py-2 px-3 sm:px-4 font-medium whitespace-nowrap text-sm sm:text-base border-b-2 ${activeTab === 'supply' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
                             ข้อมูลการจ่ายน้ำมัน
                         </button>
-                        <button onClick={() => setActiveTab('receiving')} className={`py-2 px-3 sm:px-4 font-medium whitespace-nowrap text-sm sm:text-base border-b-2 ${activeTab === 'receiving' ? 'tab-active' : 'tab-inactive'}`}>
+                        <button onClick={() => setActiveTab('receiving')} className={`py-2 px-3 sm:px-4 font-medium whitespace-nowrap text-sm sm:text-base border-b-2 ${activeTab === 'receiving' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
                            ข้อมูลการรับน้ำมัน
                         </button>
                     </div>
                     
+                    {activeTab === 'last7days' && <FuelLast7DaysTab fuelOutData={data.supply} fuelInData={data.receiving} />}
                     {activeTab === 'supply' && <FuelSupplyTab data={filteredData.supply} />}
                     {activeTab === 'receiving' && <FuelReceivingTab data={filteredData.receiving} />}
                 </div>
@@ -1730,7 +2160,7 @@
                         </select>
                         <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md" disabled={selectedYear === 'all'}>
                             <option value="all">ทุกเดือน</option>
-                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{getThaiMonthName(i)}</option>)}
+                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][i]}</option>)}
                         </select>
                     </div>
 
@@ -1792,13 +2222,481 @@
             );
         };
         // ### EV CHARGING APP COMPONENTS (END) ###
+        
+        // ##################################################################
+        // ### ENERGY COMPARISON APP (START) ###
+        // ##################################################################
+        const EnergyComparisonApp = ({ fuelData, evData }) => {
+            const today = new Date();
+            const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+            const [selectedMonth, setSelectedMonth] = useState('all'); // 'all' for the whole year
+
+            const { uniqueYears } = useMemo(() => {
+                const years = new Set();
+                (fuelData?.supply || []).forEach(item => {
+                    const date = parseDate(item['วันที่']);
+                    if (date) years.add(date.getFullYear());
+                });
+                (evData || []).forEach(item => {
+                    const date = parseDate(item.date);
+                    if (date) years.add(date.getFullYear());
+                });
+                return { uniqueYears: Array.from(years).sort((a, b) => b - a) };
+            }, [fuelData, evData]);
+
+            const comparisonData = useMemo(() => {
+                const year = selectedYear;
+                
+                const fuel = (fuelData?.supply || []).filter(item => item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา');
+                const ev = evData || [];
+
+                const getFilteredCost = (data, dateField, costField, month) => {
+                    return data.filter(item => {
+                        const date = parseDate(item[dateField]);
+                        if (!date) return false;
+                        const yearMatch = date.getFullYear() === year;
+                        const monthMatch = month === 'all' || date.getMonth() === month;
+                        return yearMatch && monthMatch;
+                    }).reduce((sum, item) => sum + (Number(item[costField]) || 0), 0);
+                };
+
+                const totalFuelCost = getFilteredCost(fuel, 'วันที่', 'ราคาน้ำมัน', selectedMonth);
+                const totalEvCost = getFilteredCost(ev, 'date', 'electricityCost', selectedMonth);
+                const totalSavings = totalFuelCost - totalEvCost;
+
+                const daysInPeriod = selectedMonth === 'all' 
+                    ? (new Date(year, 11, 31) - new Date(year, 0, 1)) / (1000 * 60 * 60 * 24) + 1
+                    : new Date(year, selectedMonth + 1, 0).getDate();
+                
+                const avgDailySavings = totalSavings / daysInPeriod;
+
+                const monthlyData = Array.from({ length: 12 }).map((_, i) => {
+                    const monthlyFuel = getFilteredCost(fuel, 'วันที่', 'ราคาน้ำมัน', i);
+                    const monthlyEv = getFilteredCost(ev, 'date', 'electricityCost', i);
+                    return {
+                        label: getThaiMonthName(i),
+                        fuel: monthlyFuel,
+                        ev: monthlyEv,
+                    };
+                });
+                
+                const monthlyChartData = monthlyData.map((month, i) => {
+                    const prevMonthFuel = i > 0 ? monthlyData[i-1].fuel : 0;
+                    const fuelSavings = prevMonthFuel - month.fuel;
+                    return {...month, fuelSavings };
+                });
+
+
+                return {
+                    totalFuelCost,
+                    totalEvCost,
+                    totalSavings,
+                    avgDailySavings,
+                    monthlyChartData
+                };
+
+            }, [fuelData, evData, selectedYear, selectedMonth]);
+
+            const MonthlyComparisonBarChart = ({ data }) => {
+                const maxValue = Math.max(...data.flatMap(d => [d.fuel, d.ev, d.fuelSavings]), 1);
+
+                const BarRow = ({ label, value, colorClass, textColorClass }) => {
+                    const percentage = maxValue > 0 ? (Math.abs(value) / maxValue) * 100 : 0;
+                    const showTextInside = percentage > 20;
+
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <div className={`w-24 text-xs text-right font-medium ${textColorClass}`}>{label}:</div>
+                            <div className="flex-1 flex items-center">
+                                <div className="flex-1 bg-gray-200 rounded-full h-5">
+                                    <div 
+                                        className={`${colorClass} h-5 rounded-full text-white text-xs flex items-center justify-end pr-2`} 
+                                        style={{ width: `${percentage}%` }}
+                                    >
+                                        {showTextInside && formatPrice(value)}
+                                    </div>
+                                </div>
+                                {!showTextInside && <span className="ml-2 text-xs font-medium text-slate-700">{formatPrice(value)}</span>}
+                            </div>
+                        </div>
+                    );
+                };
+
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h3 className="font-semibold text-lg mb-4 text-slate-800">เปรียบเทียบค่าใช้จ่ายรายเดือน</h3>
+                        <div className="space-y-4">
+                            {data.map(monthData => {
+                                const isSaving = monthData.fuelSavings >= 0;
+                                return (
+                                    <div key={monthData.label}>
+                                        <div className="font-medium text-sm text-slate-600 mb-2">{monthData.label}</div>
+                                        <div className="space-y-1">
+                                            <BarRow 
+                                                label="ค่าน้ำมัน" 
+                                                value={monthData.fuel} 
+                                                colorClass="bg-blue-500"
+                                                textColorClass="text-blue-700"
+                                            />
+                                            <BarRow 
+                                                label="ค่าไฟ EV" 
+                                                value={monthData.ev} 
+                                                colorClass="bg-green-500"
+                                                textColorClass="text-green-700"
+                                            />
+                                            <BarRow 
+                                                label={isSaving ? "ประหยัดน้ำมัน" : "น้ำมันใช้เพิ่ม"}
+                                                value={monthData.fuelSavings} 
+                                                colorClass={isSaving ? "bg-amber-500" : "bg-red-500"}
+                                                textColorClass={isSaving ? "text-amber-700" : "text-red-700"}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">เปรียบเทียบค่าใช้จ่ายพลังงาน</h2>
+                    <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2">
+                        <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
+                            {uniqueYears.map(y => <option key={y} value={y}>{y + 543}</option>)}
+                        </select>
+                        <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="all">ทุกเดือน</option>
+                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][i]}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <SummaryCard title="ค่าใช้จ่ายน้ำมันรวม" value={formatPrice(comparisonData.totalFuelCost)} unit="บาท" icon={<img src="https://img.icons8.com/?size=80&id=93a3SInn9e4L&format=png" className="w-8 h-8"/>} color={{bg:'bg-blue-100', border:'border-blue-500'}}/>
+                        <SummaryCard title="ค่าใช้จ่าย EV รวม" value={formatPrice(comparisonData.totalEvCost)} unit="บาท" icon={<Icons name="bolt"/>} color={{bg:'bg-green-100', border:'border-green-500'}}/>
+                        <SummaryCard title="ประหยัดได้ทั้งหมด" value={formatPrice(comparisonData.totalSavings)} unit="บาท" icon={<Icons name="balance"/>} color={{bg:'bg-yellow-100', border:'border-yellow-500'}}/>
+                        <SummaryCard title="ประหยัดต่อวัน (เฉลี่ย)" value={formatPrice(comparisonData.avgDailySavings)} unit="บาท" icon={<Icons name="balance"/>} color={{bg:'bg-purple-100', border:'border-purple-500'}}/>
+                    </div>
+                    
+                    <MonthlyComparisonBarChart data={comparisonData.monthlyChartData} />
+                </div>
+            );
+        };
+        
+        // ##################################################################
+        // ### EV IMPACT APP (START) ###
+        // ##################################################################
+        const EVImpactApp = ({ fuelData, evData }) => {
+            const EV_START_DATE = new Date('2025-08-01');
+            const EV_START_YEAR = EV_START_DATE.getFullYear();
+            const PREVIOUS_YEAR = EV_START_YEAR - 1;
+
+            const impactData = useMemo(() => {
+                const fuel = (fuelData?.supply || []).filter(item => item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา');
+                
+                const getMonthlyAverageCost = (data, dateField, costField, isBefore) => {
+                    const today = new Date();
+                    const currentMonth = today.getMonth();
+                    const currentYear = today.getFullYear();
+
+                    const filteredData = data.filter(item => {
+                        const d = parseDate(item[dateField]);
+                        if (!d) return false;
+
+                        // Condition 1: Check if the date is before or after the EV start date
+                        const isWithinEvPeriod = isBefore ? d < EV_START_DATE : d >= EV_START_DATE;
+                        
+                        // Condition 2: Check if the date is before the current month
+                        const isBeforeCurrentMonth = d.getFullYear() < currentYear || (d.getFullYear() === currentYear && d.getMonth() < currentMonth);
+
+                        return isWithinEvPeriod && isBeforeCurrentMonth;
+                    });
+
+                    if (filteredData.length === 0) return 0;
+
+                    const monthlyTotals = {};
+                    
+                    filteredData.forEach(item => {
+                        const d = parseDate(item[dateField]);
+                        if (d) {
+                            const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+                            if (!monthlyTotals[monthKey]) {
+                                monthlyTotals[monthKey] = 0;
+                            }
+                            monthlyTotals[monthKey] += Number(item[costField]) || 0;
+                        }
+                    });
+                    
+                    const totalCost = Object.values(monthlyTotals).reduce((sum, val) => sum + val, 0);
+                    const monthCount = Object.keys(monthlyTotals).length;
+
+                    return monthCount > 0 ? totalCost / monthCount : 0;
+                };
+
+                const avgFuelCostBefore = getMonthlyAverageCost(fuel, 'วันที่', 'ราคาน้ำมัน', true);
+                const avgFuelCostAfter = getMonthlyAverageCost(fuel, 'วันที่', 'ราคาน้ำมัน', false);
+                const avgEvCostAfter = getMonthlyAverageCost(evData, 'date', 'electricityCost', false);
+                const avgTotalCostAfter = avgFuelCostAfter + avgEvCostAfter;
+                
+                const netSavings = avgFuelCostBefore - avgTotalCostAfter;
+                const reduction = avgFuelCostBefore > 0 ? (netSavings / avgFuelCostBefore) * 100 : 0;
+                
+                const getYearlyMonthlyData = (year) => {
+                    const fuelCost = Array(12).fill(0);
+                    const evCost = Array(12).fill(0);
+
+                    fuel.filter(item => parseDate(item['วันที่'])?.getFullYear() === year)
+                        .forEach(item => {
+                            const month = parseDate(item['วันที่']).getMonth();
+                            fuelCost[month] += Number(item['ราคาน้ำมัน']) || 0;
+                        });
+
+                    evData.filter(item => parseDate(item.date)?.getFullYear() === year)
+                        .forEach(item => {
+                            const month = parseDate(item.date).getMonth();
+                            evCost[month] += Number(item.electricityCost) || 0;
+                        });
+                    
+                    return { fuelCost, evCost };
+                };
+
+                const previousYearCost = getYearlyMonthlyData(PREVIOUS_YEAR).fuelCost;
+                const currentYearCosts = getYearlyMonthlyData(EV_START_YEAR);
+                const currentYearTotalCost = currentYearCosts.fuelCost.map((fc, i) => fc + currentYearCosts.evCost[i]);
+
+                return {
+                    avgBefore: avgFuelCostBefore,
+                    avgAfter: avgTotalCostAfter,
+                    reduction,
+                    netSavings,
+                    previousYearData: previousYearCost,
+                    currentYearData: currentYearTotalCost,
+                };
+            }, [fuelData, evData]);
+            
+             const ImpactLineChart = ({ previousYearData, currentYearData }) => {
+                const labels = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                const allData = [...previousYearData, ...currentYearData];
+                const maxValue = Math.max(...allData, 1); // Avoid division by zero
+                
+                const dataToPath = (data, color) => {
+                    const points = data.map((point, i) => {
+                        const x = (i / (labels.length - 1)) * 100;
+                        const y = 100 - (point / maxValue) * 95; // Use 95% of height to avoid touching top
+                        return `${x},${y}`;
+                    }).join(' ');
+                    return <polyline fill="none" stroke={color} strokeWidth="2" points={points} />;
+                };
+
+                return (
+                    <div className="bg-white p-6 rounded-lg shadow-md mt-6 relative pb-10">
+                         <h3 className="font-semibold text-lg mb-4 text-slate-800">แนวโน้มค่าใช้จ่ายพลังงานเทียบรายปี</h3>
+                         <div className="flex justify-center space-x-4 mb-4 text-sm">
+                            <div className="flex items-center"><div className="w-4 h-1 bg-gray-400 mr-2"></div><span>ค่าน้ำมันปี {PREVIOUS_YEAR + 543}</span></div>
+                            <div className="flex items-center"><div className="w-4 h-1 bg-blue-600 mr-2"></div><span>ค่าพลังงานรวมปี {EV_START_YEAR + 543}</span></div>
+                         </div>
+                         <div className="relative h-64 pl-10 pr-4">
+                            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute top-0 left-0">
+                                {Array.from({length: 5}).map((_, i) => (
+                                    <line key={i} x1="0" y1={i * 25} x2="100" y2={i * 25} stroke="#e2e8f0" strokeWidth="0.5" />
+                                ))}
+                                {dataToPath(previousYearData, '#9ca3af')}
+                                {dataToPath(currentYearData, '#2563eb')}
+                                <line x1={(7 / 11) * 100} y1="0" x2={(7 / 11) * 100} y2="100" stroke="#ef4444" strokeWidth="1" strokeDasharray="4 2" />
+                            </svg>
+                            <div className="absolute -bottom-6 left-0 right-0 flex justify-between text-xs text-gray-500">
+                                {labels.map(label => <span key={label} className="w-1/12 text-center">{label}</span>)}
+                            </div>
+                             <div className="absolute top-0 -left-10 bottom-0 flex flex-col justify-between text-xs text-gray-500 text-right">
+                                 <span>{formatPrice(maxValue)}</span>
+                                 <span>{formatPrice(maxValue * 0.75)}</span>
+                                 <span>{formatPrice(maxValue * 0.5)}</span>
+                                 <span>{formatPrice(maxValue * 0.25)}</span>
+                                 <span>0</span>
+                            </div>
+                         </div>
+                    </div>
+                );
+            };
+
+            return (
+                 <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">ผลการประหยัดจากการใช้รถ EV ต่อค่าใช้จ่ายน้ำมัน</h2>
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <SummaryCard title="ค่าใช้จ่ายน้ำมันเฉลี่ย (ก่อนมี EV)" value={formatPrice(impactData.avgBefore)} unit="บาท/เดือน" icon={<Icons name="balance"/>} color={{bg:'bg-gray-100', border:'border-gray-400'}}/>
+                        <SummaryCard title="ค่าพลังงานรวมเฉลี่ย (หลังมี EV)" value={formatPrice(impactData.avgAfter)} unit="บาท/เดือน" icon={<Icons name="balance"/>} color={{bg:'bg-blue-100', border:'border-blue-500'}}/>
+                        <SummaryCard title="ประหยัดขึ้น (เปอร์เซ็นต์)" value={`${formatNumber(impactData.reduction)}%`} unit="" icon={<Icons name="down"/>} color={{bg:'bg-green-100', border:'border-green-500'}}/>
+                        <SummaryCard title="ประหยัดสุทธิ (หลังหักค่าไฟ)" value={formatPrice(impactData.netSavings)} unit="บาท/เดือน" icon={<Icons name="balance"/>} color={{bg:'bg-yellow-100', border:'border-yellow-500'}}/>
+                    </div>
+                    <ImpactLineChart previousYearData={impactData.previousYearData} currentYearData={impactData.currentYearData} />
+                </div>
+            );
+        };
+        
+        // ##################################################################
+        // ### BREAKEVEN APP (START) ###
+        // ##################################################################
+        const BreakevenApp = ({ repairData, fuelData, evData }) => {
+            // --- CONFIGURATIONS ---
+            const EV_CONFIG = {
+              'TT-19': { name: 'TT-19', price: 533930 },
+              'TT-20': { name: 'TT-20', price: 1660000 },
+              'TT-21': { name: 'TT-21', price: 1660000 },
+              'TT-22': { name: 'TT-22', price: 1660000 },
+              'TT-23': { name: 'TT-23', price: 1660000 },
+            };
+            const ICE_VEHICLES_FOR_COMPARISON = ['TT-02', 'TT-03', 'TT-06', 'TT-07', 'TT-08', 'TT-09', 'TT-10', 'TT-11', 'TT-12', 'TT-13', 'TT-15', 'TT-16', 'TT-17', 'TT-18'];
+
+            // --- CALCULATIONS ---
+            const iceBenchmarkCosts = useMemo(() => {
+                if (!repairData || !fuelData?.supply) return { totalRepairCost: 0, totalFuelCost: 0, avgAnnualCostPerVehicle: 0, durationYears: 0 };
+
+                const relevantRepairData = repairData.filter(item => ICE_VEHICLES_FOR_COMPARISON.includes(item['เบอร์รถ']));
+                const relevantFuelData = fuelData.supply.filter(item => ICE_VEHICLES_FOR_COMPARISON.includes(item['เบอร์รถ']));
+
+                const allData = [...relevantRepairData.map(i => i['วันที่แจ้งซ่อม(APP)']), ...relevantFuelData.map(i => i['วันที่'])];
+                const validDates = allData.map(d => parseDate(d)).filter(Boolean);
+                
+                if (validDates.length < 2) return { totalRepairCost: 0, totalFuelCost: 0, avgAnnualCostPerVehicle: 0, durationYears: 0 };
+
+                const minDate = new Date(Math.min.apply(null, validDates));
+                const maxDate = new Date(Math.max.apply(null, validDates));
+                const durationYears = (maxDate - minDate) / (1000 * 60 * 60 * 24 * 365.25);
+
+                if (durationYears <= 0) return { totalRepairCost: 0, totalFuelCost: 0, avgAnnualCostPerVehicle: 0, durationYears: 0 };
+
+                const totalRepairCost = relevantRepairData.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                const totalFuelCost = relevantFuelData.reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                
+                const totalFleetCost = totalRepairCost + totalFuelCost;
+                const avgAnnualCostForFleet = totalFleetCost / durationYears;
+                const avgAnnualCostPerVehicle = avgAnnualCostForFleet / ICE_VEHICLES_FOR_COMPARISON.length;
+
+                return { totalRepairCost, totalFuelCost, avgAnnualCostPerVehicle, durationYears };
+            }, [repairData, fuelData]);
+
+            const evAnnualCosts = useMemo(() => {
+                if (!repairData || !evData) return {};
+                const EV_START_DATE = new Date('2025-08-01');
+                const today = new Date(); // Use current date for calculation
+                
+                // Ensure we don't divide by zero or a tiny number if the app is run on the start date
+                const timeDiff = today - EV_START_DATE;
+                if (timeDiff <= 0) return {};
+                
+                const durationYears = timeDiff / (1000 * 60 * 60 * 24 * 365.25);
+
+                const costs = {};
+                Object.keys(EV_CONFIG).forEach(evPlate => {
+                    const evRepairData = repairData.filter(item => item['เบอร์รถ'] === evPlate && parseDate(item['วันที่แจ้งซ่อม(APP)']) >= EV_START_DATE);
+                    const totalRepairCost = evRepairData.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                    
+                    const evChargeData = evData.filter(item => item.licensePlate === evPlate);
+                    const totalChargeCost = evChargeData.reduce((sum, item) => sum + (Number(item.electricityCost) || 0), 0);
+
+                    const totalCost = totalRepairCost + totalChargeCost;
+                    const annualCost = totalCost / durationYears;
+                    costs[evPlate] = annualCost;
+                });
+                return costs;
+            }, [repairData, evData]);
+
+            const breakevenPoints = useMemo(() => {
+                return Object.values(EV_CONFIG).map(ev => {
+                    const initialCost = ev.price;
+                    const evAnnualCost = evAnnualCosts[ev.name] || 0;
+                    const iceAnnualCost = iceBenchmarkCosts.avgAnnualCostPerVehicle;
+                    const annualSavings = iceAnnualCost - evAnnualCost;
+
+                    if (annualSavings <= 0) {
+                        return { ...ev, evAnnualCost, annualSavings, yearsToBreakeven: Infinity };
+                    }
+                    const yearsToBreakeven = initialCost / annualSavings;
+                    return { ...ev, initialCost, evAnnualCost, annualSavings, yearsToBreakeven };
+                });
+            }, [EV_CONFIG, iceBenchmarkCosts, evAnnualCosts]);
+
+            return (
+                <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 space-y-6">
+                    <div className="flex justify-between items-start">
+                        <h2 className="text-xl font-bold text-gray-800">วิเคราะห์จุดคุ้มทุนรถยนต์ไฟฟ้า (EV Break-Even Analysis)</h2>
+                        <div className="tooltip-container">
+                             <svg className="w-6 h-6 text-gray-400 hover:text-gray-600 tooltip-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            <div className="tooltip-text text-sm">
+                                <strong className="block mb-2 text-base">สูตรการคำนวณจุดคุ้มทุน</strong>
+                                <ol className="list-decimal list-inside space-y-1">
+                                    <li>
+                                        <strong>ค่าใช้จ่ายรถสันดาป/ปี:</strong> คำนวณค่าซ่อมและค่าน้ำมันเฉลี่ยต่อปีของรถสันดาปทั้งหมดที่ใช้เปรียบเทียบ
+                                    </li>
+                                    <li>
+                                        <strong>ค่าใช้จ่าย EV/ปี:</strong> คำนวณค่าซ่อมและค่าไฟเฉลี่ยต่อปีของรถ EV แต่ละคัน (จากข้อมูลที่เกิดขึ้นจริง)
+                                    </li>
+                                     <li>
+                                        <strong>เงินประหยัดสุทธิ/ปี:</strong> (ค่าใช้จ่ายรถสันดาป) - (ค่าใช้จ่าย EV)
+                                    </li>
+                                    <li>
+                                        <strong>ระยะเวลาคุ้มทุน (ปี):</strong> ราคาเริ่มต้นของรถ EV / เงินประหยัดสุทธิต่อปี
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Costs Summary Section */}
+                     <div className="p-4 border rounded-lg bg-blue-50">
+                        <h3 className="font-semibold text-lg text-blue-800">ค่าใช้จ่ายเฉลี่ยของรถสันดาป (Benchmark)</h3>
+                        <p className="text-sm text-blue-600 mb-2">
+                            คำนวณจากค่าซ่อมและค่าเชื้อเพลิงย้อนหลัง {formatNumber(iceBenchmarkCosts.durationYears, 1)} ปี ของรถ {ICE_VEHICLES_FOR_COMPARISON.length} คัน
+                        </p>
+                        <div className="text-3xl font-bold text-blue-900">{formatPrice(iceBenchmarkCosts.avgAnnualCostPerVehicle)}</div>
+                        <div className="text-md text-blue-700">บาท/คัน/ปี</div>
+                    </div>
+
+                    {/* Results Table */}
+                    <div className="overflow-x-auto">
+                        <h3 className="font-semibold text-lg text-slate-800 mb-2">ผลการวิเคราะห์จุดคุ้มทุน</h3>
+                        <p className="text-sm text-slate-600 mb-3">
+                            ตารางนี้แสดงระยะเวลาที่ส่วนต่างของค่าใช้จ่ายรายปี จะคุ้มทุนกับราคารถ EV ที่ลงทุนไป
+                        </p>
+                        <table className="w-full text-sm text-left text-gray-700 border-collapse">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                    <th className="px-4 py-3 border">เบอร์รถ EV</th>
+                                    <th className="px-4 py-3 border text-right">ราคารถ EV (บาท)</th>
+                                    <th className="px-4 py-3 border text-right">ค่าใช้จ่าย EV ต่อปี (บาท)</th>
+                                    <th className="px-4 py-3 border text-right">ประหยัดได้ต่อปี (บาท)</th>
+                                    <th className="px-4 py-3 border text-right">ระยะเวลาคุ้มทุน (ปี)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {breakevenPoints.map(ev => (
+                                    <tr key={ev.name} className="bg-white border-b hover:bg-gray-50">
+                                        <td className="px-4 py-3 border font-medium">{ev.name}</td>
+                                        <td className="px-4 py-3 border text-right">{formatPrice(ev.price)}</td>
+                                        <td className="px-4 py-3 border text-right text-red-600">{formatPrice(ev.evAnnualCost)}</td>
+                                        <td className={`px-4 py-3 border text-right font-semibold ${ev.annualSavings > 0 ? 'text-green-700' : 'text-red-700'}`}>{formatPrice(ev.annualSavings)}</td>
+                                        <td className="px-4 py-3 border text-right font-bold text-indigo-700">
+                                            {isFinite(ev.yearsToBreakeven) ? formatNumber(ev.yearsToBreakeven, 1) : 'ไม่คุ้มทุน'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+        // ### BREAKEVEN APP (END) ###
 
 
         // ##################################################################
         // ### MAIN APP COMPONENT (คอมโพเนนต์หลัก) ###
         // ##################################################################
         const App = () => {
-            const [activeApp, setActiveApp] = useState('repair'); // 'repair', 'fuel', or 'ev'
+            const [activeApp, setActiveApp] = useState('repair'); // 'repair', 'fuel', 'ev', 'energy', 'ev_impact', 'breakeven'
             const [data, setData] = useState(null);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
@@ -1870,6 +2768,12 @@
                         return <FuelApp data={data.fuelData} />;
                     case 'ev':
                         return <EVChargingApp data={data.evData} />;
+                    case 'energy':
+                        return <EnergyComparisonApp fuelData={data.fuelData} evData={data.evData} />;
+                    case 'ev_impact':
+                        return <EVImpactApp fuelData={data.fuelData} evData={data.evData} />;
+                    case 'breakeven':
+                        return <BreakevenApp repairData={data.repairData} fuelData={data.fuelData} evData={data.evData} />;
                     default:
                         return null;
                 }
@@ -1879,7 +2783,7 @@
                 <div className="container mx-auto p-4 sm:p-6">
                     <header className="mb-6">
                         <div className="header-container flex flex-col sm:flex-row justify-between items-center">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">Dashboard ภาพรวม</h1>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">รายงานค่าใช้จ่าย Material handling</h1>
                              <button type="button" className="refresh-button" onClick={fetchDataFromScript} disabled={loading}>
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1913,6 +2817,18 @@
                                 <button title="ชาร์จไฟEV" className={`nav-button ${activeApp === 'ev' ? 'active' : ''}`} onClick={() => setActiveApp('ev')}>
                                     <Icons name="bolt" className="w-6 h-6" />
                                     <span className="nav-text">ชาร์จไฟEV</span>
+                                </button>
+                                <button title="เปรียบเทียบพลังงาน" className={`nav-button ${activeApp === 'energy' ? 'active' : ''}`} onClick={() => setActiveApp('energy')}>
+                                    <Icons name="balance" className="w-6 h-6" />
+                                    <span className="nav-text">เปรียบเทียบ</span>
+                                </button>
+                                <button title="ผลการประหยัด EV" className={`nav-button ${activeApp === 'ev_impact' ? 'active' : ''}`} onClick={() => setActiveApp('ev_impact')}>
+                                     <dotlottie-wc src="https://lottie.host/ddc40909-2718-4242-927f-e3fda3ac77ca/L8DWV25LrA.lottie" style={{width: '24px', height: '24px'}} speed="1" autoplay loop></dotlottie-wc>
+                                    <span className="nav-text">ผลประหยัดEV</span>
+                                </button>
+                                <button title="จุดคุ้มทุน EV" className={`nav-button ${activeApp === 'breakeven' ? 'active' : ''}`} onClick={() => setActiveApp('breakeven')}>
+                                     <Icons name="calculator" className="w-6 h-6" />
+                                    <span className="nav-text">จุดคุ้มทุน EV</span>
                                 </button>
                             </div>
                         </nav>
