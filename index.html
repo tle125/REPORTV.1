@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -166,45 +167,6 @@
           color: white;
         }
 
-        /* Tooltip styles */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-        }
-        .tooltip-icon {
-            cursor: pointer;
-        }
-        .tooltip-text {
-            visibility: hidden;
-            width: 320px;
-            background-color: #334155;
-            color: #fff;
-            text-align: left;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -160px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #334155 transparent transparent transparent;
-        }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
 
         /* Mobile adjustments */
         @media (max-width: 768px) {
@@ -267,7 +229,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        window.firebase = { initializeApp, getFirestore, collection, getDocs, query, orderBy };
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        window.firebase = { initializeApp, getFirestore, collection, getDocs, query, orderBy, getAuth, signInAnonymously };
     </script>
 </head>
 <body>
@@ -283,13 +246,13 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp0yu3ryGYYaaSIkTkOs64BFI3CYllPcQPJe3HcpldhPqHnggmmjTC1uSOV_xHLpUh/exec'; 
         
         const firebaseConfig = {
-          apiKey: "AIzaSyCEN8ANVFzs2dExfJP-HDTuRGxtV3TYzHU",
-          authDomain: "sodium-burner-428202-f9.firebaseapp.com",
-          projectId: "sodium-burner-428202-f9",
-          storageBucket: "sodium-burner-428202-f9.appspot.com",
-          messagingSenderId: "46765828618",
-          appId: "1:46765828618:web:59eb170cfcd92c0e578df3",
-          measurementId: "G-MJ19J3TF2R"
+          apiKey: "AIzaSyAtlLnWd2Rkbx48Gt2LSrqLrtFr1a7A46w",
+          authDomain: "tmtev-2025.firebaseapp.com",
+          projectId: "tmtev-2025",
+          storageBucket: "tmtev-2025.firebasestorage.app",
+          messagingSenderId: "224826852272",
+          appId: "1:224826852272:web:fd9c9805ea55747edc0c75",
+          measurementId: "G-KYW1JLVFHX"
         };
 
         // ##################################################################
@@ -1138,7 +1101,7 @@
                 const allData = [...filteredOut, ...filteredIn];
 
                 const grouped = allData.reduce((acc, item) => {
-                    const dateKey = parseDate(item['วันที่']).toISOString().split('T')[0];
+                    const dateKey = parseDate(item['วันที่']).toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' }).split(' ')[0];
                     if (!acc[dateKey]) {
                         acc[dateKey] = { items: [], totalOut: 0, totalIn: 0 };
                     }
@@ -2619,31 +2582,7 @@
 
             return (
                 <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 space-y-6">
-                    <div className="flex justify-between items-start">
-                        <h2 className="text-xl font-bold text-gray-800">วิเคราะห์จุดคุ้มทุนรถยนต์ไฟฟ้า (EV Break-Even Analysis)</h2>
-                        <div className="tooltip-container">
-                             <svg className="w-6 h-6 text-gray-400 hover:text-gray-600 tooltip-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                            </svg>
-                            <div className="tooltip-text text-sm">
-                                <strong className="block mb-2 text-base">สูตรการคำนวณจุดคุ้มทุน</strong>
-                                <ol className="list-decimal list-inside space-y-1">
-                                    <li>
-                                        <strong>ค่าใช้จ่ายรถสันดาป/ปี:</strong> คำนวณค่าซ่อมและค่าน้ำมันเฉลี่ยต่อปีของรถสันดาปทั้งหมดที่ใช้เปรียบเทียบ
-                                    </li>
-                                    <li>
-                                        <strong>ค่าใช้จ่าย EV/ปี:</strong> คำนวณค่าซ่อมและค่าไฟเฉลี่ยต่อปีของรถ EV แต่ละคัน (จากข้อมูลที่เกิดขึ้นจริง)
-                                    </li>
-                                     <li>
-                                        <strong>เงินประหยัดสุทธิ/ปี:</strong> (ค่าใช้จ่ายรถสันดาป) - (ค่าใช้จ่าย EV)
-                                    </li>
-                                    <li>
-                                        <strong>ระยะเวลาคุ้มทุน (ปี):</strong> ราคาเริ่มต้นของรถ EV / เงินประหยัดสุทธิต่อปี
-                                    </li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div>
+                    <h2 className="text-xl font-bold text-gray-800">วิเคราะห์จุดคุ้มทุนรถยนต์ไฟฟ้า (EV Break-Even Analysis)</h2>
                     
                     {/* Costs Summary Section */}
                      <div className="p-4 border rounded-lg bg-blue-50">
@@ -2719,15 +2658,25 @@
                 try {
                     // Initialize Firebase
                     const app = window.firebase.initializeApp(firebaseConfig);
+                    const auth = window.firebase.getAuth(app);
                     const db = window.firebase.getFirestore(app);
 
+                    // Authenticate anonymously first
+                    console.log('Attempting anonymous authentication...');
+                    const userCredential = await window.firebase.signInAnonymously(auth);
+                    console.log('Authentication successful:', userCredential.user.uid);
+
                     // Fetch from Google Sheet and Firebase in parallel
+                    console.log('Fetching data from Google Sheet and Firestore...');
                     const [sheetResponse, historySnapshot] = await Promise.all([
                         fetch(SCRIPT_URL),
                         window.firebase.getDocs(window.firebase.query(
-                            window.firebase.collection(db, `artifacts/sodium-burner-428202-f9/history`),
+                            window.firebase.collection(db, `artifacts/tmtev-2025/history`),
                             window.firebase.orderBy("date", "desc")
-                        ))
+                        )).catch(error => {
+                            console.error('Firestore error:', error);
+                            throw error;
+                        })
                     ]);
 
                     if (!sheetResponse.ok) {
