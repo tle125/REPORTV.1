@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -7,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>รายงานค่าใช้จ่าย Material handling</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
@@ -171,7 +173,7 @@
         /* Mobile adjustments */
         @media (max-width: 768px) {
             body {
-                padding-bottom: 80px; /* Space for bottom nav */
+                padding-bottom: 90px; /* Increased space for bottom nav */
             }
             .header-container {
                 position: relative;
@@ -200,15 +202,48 @@
                 left: 0;
                 right: 0;
                 z-index: 100;
-                padding: 10px 0;
-                background-color: #f1f5f9; /* Match body background */
+                padding: 8px 12px 12px 12px; /* Better padding */
+                background: linear-gradient(135deg, #1e40af 0%, #1b85db 100%); /* Gradient background */
                 display: flex;
                 justify-content: center;
-                border-top: 1px solid #e2e8f0;
+                border-top: 2px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15); /* Better shadow */
             }
             .button-container {
                 width: 100%;
-                max-width: 540px;
+                max-width: 100%; /* Use full width */
+                background-color: transparent; /* Remove background */
+                box-shadow: none; /* Remove shadow */
+                height: 70px; /* Increased height */
+                padding: 0 8px; /* Add horizontal padding */
+            }
+            .nav-button {
+                width: auto; /* Auto width */
+                flex: 1; /* Equal distribution */
+                min-width: 0; /* Allow shrinking */
+                padding: 8px 4px; /* Better padding */
+                margin: 0 2px; /* Small margin between buttons */
+                border-radius: 12px; /* More rounded */
+                background-color: rgba(255, 255, 255, 0.1); /* Subtle background */
+                backdrop-filter: blur(10px); /* Glass effect */
+            }
+            .nav-button:hover {
+                transform: translateY(-2px); /* Less movement */
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+            .nav-button.active {
+                background-color: rgba(255, 255, 255, 0.25);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+            .nav-text {
+                font-size: 0.65rem; /* Smaller text */
+                margin-top: 3px;
+                font-weight: 500;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Text shadow for better readability */
+            }
+            .nav-button svg {
+                width: 20px; /* Smaller icons */
+                height: 20px;
             }
         }
     </style>
@@ -387,7 +422,8 @@
                 down: <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21l-7.5-7.5" />,
                 balance: <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25h7.5M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />,
                 impact: <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1-8.414 1.414M2.25 18 18 2.25M12 21V9M15.75 21v-5.25M8.25 21v-5.25" />,
-                calculator: <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm3-6h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm3-6h.008v.008H14.25v-.008zm0 3h.008v.008H14.25v-.008zM4.5 3.75v16.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V3.75m-15 0h15M4.5 3.75a2.25 2.25 0 012.25-2.25h10.5a2.25 2.25 0 012.25 2.25" />
+                calculator: <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm3-6h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm3-6h.008v.008H14.25v-.008zm0 3h.008v.008H14.25v-.008zM4.5 3.75v16.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V3.75m-15 0h15M4.5 3.75a2.25 2.25 0 012.25-2.25h10.5a2.25 2.25 0 012.25 2.25" />,
+                grid: <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
             };
             return <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>{iconPaths[name]}</svg>;
         };
@@ -427,6 +463,136 @@
                             </div>
                         ))}
                     </div>
+
+
+                </div>
+            );
+        };
+
+        // ##################################################################
+        // ### EXPENSE CHART COMPONENT (คอมโพเนนต์กราฟค่าใช้จ่าย) ###
+        // ##################################################################
+        const ExpenseChart = ({ data, title }) => {
+            const maxValue = Math.max(...data.flatMap(item => [item.current, item.last, Math.abs(item.difference)]));
+            const colors = {
+                current: 'bg-blue-500',
+                last: 'bg-gray-400', 
+                difference: 'bg-green-500',
+                differenceNegative: 'bg-red-500'
+            };
+
+            return (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">{title}</h3>
+                    
+                    {/* Legend */}
+                    <div className="flex flex-wrap justify-center gap-4 mb-6">
+                        <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 ${colors.current} rounded`}></div>
+                            <span className="text-sm text-gray-600">ปี {new Date().getFullYear()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 ${colors.last} rounded`}></div>
+                            <span className="text-sm text-gray-600">ปี {new Date().getFullYear() - 1}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 ${colors.difference} rounded`}></div>
+                            <span className="text-sm text-gray-600">ผลต่าง (ลดลง)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 ${colors.differenceNegative} rounded`}></div>
+                            <span className="text-sm text-gray-600">ผลต่าง (เพิ่มขึ้น)</span>
+                        </div>
+                    </div>
+
+                    {/* Vertical Bar Chart */}
+                    <div className="flex justify-center items-end space-x-8 h-80 bg-gray-50 rounded-lg p-4">
+                        {data.map((item, index) => (
+                            <div key={index} className="flex flex-col items-center space-y-2">
+                                {/* Category Label */}
+                                <div className="text-xs text-gray-600 text-center font-medium mb-2 w-20">
+                                    {item.category.replace(' (ยกเว้นยาง)', '').replace('ค่า', '')}
+                                </div>
+                                
+                                {/* Bars Container */}
+                                <div className="flex items-end space-x-1 h-64">
+                                    {/* Current Year Bar */}
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`${colors.current} w-8 rounded-t flex items-end justify-center pb-1`}
+                                            style={{ height: maxValue > 0 ? `${(item.current / maxValue) * 240}px` : '2px' }}
+                                        >
+                                            <span className="text-xs text-white font-medium transform -rotate-90 whitespace-nowrap">
+                                                {maxValue > 0 && (item.current / maxValue) * 240 > 30 ? 
+                                                    formatPrice(item.current).replace('฿', '').replace(',', 'K').slice(0, -3) + 'K' : ''}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-blue-600 mt-1 font-medium">
+                                            {formatPrice(item.current)}
+                                        </div>
+                                    </div>
+
+                                    {/* Last Year Bar */}
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`${colors.last} w-8 rounded-t flex items-end justify-center pb-1`}
+                                            style={{ height: maxValue > 0 ? `${(item.last / maxValue) * 240}px` : '2px' }}
+                                        >
+                                            <span className="text-xs text-white font-medium transform -rotate-90 whitespace-nowrap">
+                                                {maxValue > 0 && (item.last / maxValue) * 240 > 30 ? 
+                                                    formatPrice(item.last).replace('฿', '').replace(',', 'K').slice(0, -3) + 'K' : ''}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600 mt-1 font-medium">
+                                            {formatPrice(item.last)}
+                                        </div>
+                                    </div>
+
+                                    {/* Difference Bar */}
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`${item.difference >= 0 ? colors.differenceNegative : colors.difference} w-8 rounded-t flex items-end justify-center pb-1`}
+                                            style={{ height: maxValue > 0 ? `${(Math.abs(item.difference) / maxValue) * 240}px` : '2px' }}
+                                        >
+                                            <span className="text-xs text-white font-medium transform -rotate-90 whitespace-nowrap">
+                                                {maxValue > 0 && (Math.abs(item.difference) / maxValue) * 240 > 30 ? 
+                                                    `${item.difference >= 0 ? '+' : ''}${formatPrice(item.difference).replace('฿', '').replace(',', 'K').slice(0, -3)}K` : ''}
+                                            </span>
+                                        </div>
+                                        <div className={`text-xs mt-1 font-medium ${
+                                            item.difference >= 0 ? 'text-red-600' : 'text-green-600'
+                                        }`}>
+                                            {item.difference >= 0 ? '+' : ''}{formatPrice(item.difference)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {/* Legend */}
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                        <div className="flex flex-wrap justify-center gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className={`w-4 h-4 ${colors.current} rounded`}></div>
+                                <span className="text-gray-600">ปี {new Date().getFullYear()}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className={`w-4 h-4 ${colors.last} rounded`}></div>
+                                <span className="text-gray-600">ปี {new Date().getFullYear() - 1}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className={`w-4 h-4 ${colors.difference} rounded`}></div>
+                                <span className="text-gray-600">ผลต่าง (ลดลง)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className={`w-4 h-4 ${colors.differenceNegative} rounded`}></div>
+                                <span className="text-gray-600">ผลต่าง (เพิ่มขึ้น)</span>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             );
         };
@@ -471,6 +637,306 @@
                             </div>
                         </div>
                     )}
+                </div>
+            );
+        };
+
+        // ##################################################################
+        // ### OVERVIEW APP (แอปภาพรวม) ###
+        // ##################################################################
+        const OverviewApp = ({ repairData, fuelData, evData }) => {
+            const currentYear = new Date().getFullYear();
+            const lastYear = currentYear - 1;
+
+            // คำนวณค่าซ่อมทั้งหมด (ยกเว้นยาง)
+            const repairCosts = useMemo(() => {
+                const currentYearRepairs = repairData.filter(item => {
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    const isNotTire = !item['ประเภท']?.toLowerCase().includes('ยาง') && 
+                                     !item['รายการซ่อม']?.toLowerCase().includes('ยาง');
+                    return date && date.getFullYear() === currentYear && isNotTire;
+                });
+                
+                const lastYearRepairs = repairData.filter(item => {
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    const isNotTire = !item['ประเภท']?.toLowerCase().includes('ยาง') && 
+                                     !item['รายการซ่อม']?.toLowerCase().includes('ยาง');
+                    return date && date.getFullYear() === lastYear && isNotTire;
+                });
+
+                const currentTotal = currentYearRepairs.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                const lastTotal = lastYearRepairs.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                const difference = currentTotal - lastTotal;
+                const percentChange = lastTotal > 0 ? ((difference / lastTotal) * 100) : 0;
+
+                return { currentTotal, lastTotal, difference, percentChange };
+            }, [repairData, currentYear, lastYear]);
+
+            // คำนวณค่าน้ำมัน
+            const fuelCosts = useMemo(() => {
+                const fuelSupply = fuelData?.supply || [];
+                const currentYearFuel = fuelSupply.filter(item => {
+                    const date = parseDate(item['วันที่']);
+                    return date && date.getFullYear() === currentYear && item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา';
+                });
+                
+                const lastYearFuel = fuelSupply.filter(item => {
+                    const date = parseDate(item['วันที่']);
+                    return date && date.getFullYear() === lastYear && item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา';
+                });
+
+                const currentTotal = currentYearFuel.reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                const lastTotal = lastYearFuel.reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                const difference = currentTotal - lastTotal;
+                const percentChange = lastTotal > 0 ? ((difference / lastTotal) * 100) : 0;
+
+                return { currentTotal, lastTotal, difference, percentChange };
+            }, [fuelData, currentYear, lastYear]);
+
+            // คำนวณค่าซ่อมยาง
+            const tireCosts = useMemo(() => {
+                const currentYearTires = repairData.filter(item => {
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    const isTire = item['ประเภท']?.toLowerCase().includes('ยาง') || 
+                                  item['รายการซ่อม']?.toLowerCase().includes('ยาง');
+                    return date && date.getFullYear() === currentYear && isTire;
+                });
+                
+                const lastYearTires = repairData.filter(item => {
+                    const date = parseDate(item['วันที่แจ้งซ่อม(APP)']);
+                    const isTire = item['ประเภท']?.toLowerCase().includes('ยาง') || 
+                                  item['รายการซ่อม']?.toLowerCase().includes('ยาง');
+                    return date && date.getFullYear() === lastYear && isTire;
+                });
+
+                const currentTotal = currentYearTires.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                const lastTotal = lastYearTires.reduce((sum, item) => sum + calculateTotalCost(item), 0);
+                const difference = currentTotal - lastTotal;
+                const percentChange = lastTotal > 0 ? ((difference / lastTotal) * 100) : 0;
+
+                return { currentTotal, lastTotal, difference, percentChange };
+            }, [repairData, currentYear, lastYear]);
+
+            // คำนวณค่าไฟฟ้ารถ EV
+            const evCosts = useMemo(() => {
+                const currentYearEV = evData.filter(item => {
+                    const date = parseDate(item.date);
+                    return date && date.getFullYear() === currentYear;
+                });
+                
+                const lastYearEV = evData.filter(item => {
+                    const date = parseDate(item.date);
+                    return date && date.getFullYear() === lastYear;
+                });
+
+                const currentTotal = currentYearEV.reduce((sum, item) => sum + (Number(item.electricityCost) || 0), 0);
+                const lastTotal = lastYearEV.reduce((sum, item) => sum + (Number(item.electricityCost) || 0), 0);
+                const difference = currentTotal - lastTotal;
+                const percentChange = lastTotal > 0 ? ((difference / lastTotal) * 100) : 0;
+
+                return { currentTotal, lastTotal, difference, percentChange };
+            }, [evData, currentYear, lastYear]);
+
+            return (
+                <div className="space-y-6">
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">ภาพรวมค่าใช้จ่าย</h2>
+                        <p className="text-gray-600">เปรียบเทียบข้อมูลปี {lastYear} กับปี {currentYear}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* ค่าซ่อม (ยกเว้นยาง) */}
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">ค่าซ่อม (ยกเว้นยาง)</h3>
+                                <Icons name="toolbox" className="w-8 h-8 text-blue-600" />
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {currentYear}</p>
+                                    <p className="text-2xl font-bold text-blue-600">{formatPrice(repairCosts.currentTotal)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {lastYear}</p>
+                                    <p className="text-lg text-gray-700">{formatPrice(repairCosts.lastTotal)}</p>
+                                </div>
+                                <div className="border-t pt-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">ผลต่าง</span>
+                                        <span className={`font-semibold ${repairCosts.difference >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {repairCosts.difference >= 0 ? '+' : ''}{formatPrice(repairCosts.difference)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-1">
+                                        <span className="text-sm text-gray-600">% เปลี่ยนแปลง</span>
+                                        <span className={`font-semibold ${repairCosts.percentChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {repairCosts.percentChange >= 0 ? '+' : ''}{repairCosts.percentChange.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ค่าน้ำมัน */}
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">ค่าน้ำมัน</h3>
+                                <img src="https://img.icons8.com/?size=80&id=93a3SInn9e4L&format=png" alt="น้ำมัน" className="w-8 h-8" />
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {currentYear}</p>
+                                    <p className="text-2xl font-bold text-orange-600">{formatPrice(fuelCosts.currentTotal)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {lastYear}</p>
+                                    <p className="text-lg text-gray-700">{formatPrice(fuelCosts.lastTotal)}</p>
+                                </div>
+                                <div className="border-t pt-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">ผลต่าง</span>
+                                        <span className={`font-semibold ${fuelCosts.difference >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {fuelCosts.difference >= 0 ? '+' : ''}{formatPrice(fuelCosts.difference)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-1">
+                                        <span className="text-sm text-gray-600">% เปลี่ยนแปลง</span>
+                                        <span className={`font-semibold ${fuelCosts.percentChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {fuelCosts.percentChange >= 0 ? '+' : ''}{fuelCosts.percentChange.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ค่าซ่อมยาง */}
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">ค่าซ่อมยาง</h3>
+                                <Icons name="circle" className="w-8 h-8 text-gray-600" />
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {currentYear}</p>
+                                    <p className="text-2xl font-bold text-gray-600">{formatPrice(tireCosts.currentTotal)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {lastYear}</p>
+                                    <p className="text-lg text-gray-700">{formatPrice(tireCosts.lastTotal)}</p>
+                                </div>
+                                <div className="border-t pt-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">ผลต่าง</span>
+                                        <span className={`font-semibold ${tireCosts.difference >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {tireCosts.difference >= 0 ? '+' : ''}{formatPrice(tireCosts.difference)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-1">
+                                        <span className="text-sm text-gray-600">% เปลี่ยนแปลง</span>
+                                        <span className={`font-semibold ${tireCosts.percentChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {tireCosts.percentChange >= 0 ? '+' : ''}{tireCosts.percentChange.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ค่าไฟฟ้ารถ EV */}
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">ค่าไฟฟ้ารถ EV</h3>
+                                <Icons name="bolt" className="w-8 h-8 text-green-600" />
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {currentYear}</p>
+                                    <p className="text-2xl font-bold text-green-600">{formatPrice(evCosts.currentTotal)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">ปี {lastYear}</p>
+                                    <p className="text-lg text-gray-700">{formatPrice(evCosts.lastTotal)}</p>
+                                </div>
+                                <div className="border-t pt-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">ผลต่าง</span>
+                                        <span className={`font-semibold ${evCosts.difference >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {evCosts.difference >= 0 ? '+' : ''}{formatPrice(evCosts.difference)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-1">
+                                        <span className="text-sm text-gray-600">% เปลี่ยนแปลง</span>
+                                        <span className={`font-semibold ${evCosts.percentChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {evCosts.percentChange >= 0 ? '+' : ''}{evCosts.percentChange.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* สรุปรวม */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mt-8">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">สรุปค่าใช้จ่ายรวม</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="text-center">
+                                <p className="text-sm text-gray-600 mb-2">ปี {currentYear}</p>
+                                <p className="text-3xl font-bold text-blue-600">
+                                    {formatPrice(repairCosts.currentTotal + fuelCosts.currentTotal + tireCosts.currentTotal + evCosts.currentTotal)}
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-sm text-gray-600 mb-2">ปี {lastYear}</p>
+                                <p className="text-2xl font-semibold text-gray-700">
+                                    {formatPrice(repairCosts.lastTotal + fuelCosts.lastTotal + tireCosts.lastTotal + evCosts.lastTotal)}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="text-center mt-4 pt-4 border-t border-gray-200">
+                            <div className="flex justify-center items-center space-x-6">
+                                <div>
+                                    <span className="text-sm text-gray-600">ผลต่างรวม: </span>
+                                    <span className={`font-bold text-lg ${
+                                        (repairCosts.difference + fuelCosts.difference + tireCosts.difference + evCosts.difference) >= 0 
+                                        ? 'text-red-600' : 'text-green-600'
+                                    }`}>
+                                        {(repairCosts.difference + fuelCosts.difference + tireCosts.difference + evCosts.difference) >= 0 ? '+' : ''}
+                                        {formatPrice(repairCosts.difference + fuelCosts.difference + tireCosts.difference + evCosts.difference)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* กราฟเปรียบเทียบค่าใช้จ่าย */}
+                    <ExpenseChart 
+                        title="กราฟเปรียบเทียบค่าใช้จ่ายแต่ละหมวด"
+                        data={[
+                            {
+                                category: "ค่าซ่อม (ยกเว้นยาง)",
+                                current: repairCosts.currentTotal,
+                                last: repairCosts.lastTotal,
+                                difference: repairCosts.difference
+                            },
+                            {
+                                category: "ค่าน้ำมัน",
+                                current: fuelCosts.currentTotal,
+                                last: fuelCosts.lastTotal,
+                                difference: fuelCosts.difference
+                            },
+                            {
+                                category: "ค่าซ่อมยาง",
+                                current: tireCosts.currentTotal,
+                                last: tireCosts.lastTotal,
+                                difference: tireCosts.difference
+                            },
+                            {
+                                category: "ค่าไฟฟ้ารถ EV",
+                                current: evCosts.currentTotal,
+                                last: evCosts.lastTotal,
+                                difference: evCosts.difference
+                            }
+                        ]}
+                    />
                 </div>
             );
         };
@@ -565,6 +1031,55 @@
             const toggleMonth = (monthKey) => setExpandedMonths(prev => { const newSet = new Set(prev); if (newSet.has(monthKey)) newSet.delete(monthKey); else newSet.add(monthKey); return newSet; });
             const totalCost = useMemo(() => filteredData.reduce((sum, item) => sum + calculateTotalCost(item), 0), [filteredData]);
 
+            // Calculate yearly totals for summary cards
+            const currentYear = new Date().getFullYear();
+            const lastYear = currentYear - 1;
+            
+            const currentYearTotal = useMemo(() => {
+                if (!data || !Array.isArray(data) || data.length === 0) {
+                    return 0;
+                }
+                
+                const currentYearData = data.filter(item => {
+                    const dateStr = item['วันที่แจ้งซ่อม(APP)'];
+                    if (!dateStr) return false;
+                    
+                    const parsedDate = parseDate(dateStr);
+                    if (!parsedDate) return false;
+                    
+                    const itemYear = parsedDate.getFullYear();
+                    return itemYear === currentYear;
+                });
+                
+                return currentYearData.reduce((sum, item) => {
+                    return sum + calculateTotalCost(item);
+                }, 0);
+            }, [data, currentYear]);
+            
+            const lastYearTotal = useMemo(() => {
+                if (!data || !Array.isArray(data) || data.length === 0) {
+                    return 0;
+                }
+                
+                const lastYearData = data.filter(item => {
+                    const dateStr = item['วันที่แจ้งซ่อม(APP)'];
+                    if (!dateStr) return false;
+                    
+                    const parsedDate = parseDate(dateStr);
+                    if (!parsedDate) return false;
+                    
+                    const itemYear = parsedDate.getFullYear();
+                    return itemYear === lastYear;
+                });
+                
+                return lastYearData.reduce((sum, item) => {
+                    return sum + calculateTotalCost(item);
+                }, 0);
+            }, [data, lastYear]);
+            
+            const yearlyDifference = currentYearTotal - lastYearTotal;
+            const yearlyPercentChange = lastYearTotal > 0 ? ((yearlyDifference / lastYearTotal) * 100) : 0;
+
             const searchColumns = [
                 { key: 'ลำดับที่', label: 'ลำดับที่', render: (val, row, index) => index + 1 },
                 { key: 'เบอร์รถ', label: 'เบอร์รถ' },
@@ -579,6 +1094,40 @@
 
             return (
                 <div>
+                    {/* Yearly Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <SummaryCard
+                            title={`ยอดซ่อมปี ${currentYear}`}
+                            value={formatPrice(currentYearTotal)}
+                            unit="บาท"
+                            icon="📊"
+                            color="blue"
+                        />
+                        <SummaryCard
+                            title={`ยอดซ่อมปี ${lastYear}`}
+                            value={formatPrice(lastYearTotal)}
+                            unit="บาท"
+                            icon="📈"
+                            color="gray"
+                        />
+                        <SummaryCard
+                            title="ผลต่าง"
+                            value={formatPrice(Math.abs(yearlyDifference))}
+                            unit="บาท"
+                            icon={yearlyDifference >= 0 ? "📈" : "📉"}
+                            color={yearlyDifference >= 0 ? "red" : "green"}
+                            subtitle={yearlyDifference >= 0 ? "เพิ่มขึ้น" : "ลดลง"}
+                        />
+                        <SummaryCard
+                            title="% การเปลี่ยนแปลง"
+                            value={Math.abs(yearlyPercentChange).toFixed(1)}
+                            unit="%"
+                            icon={yearlyPercentChange >= 0 ? "📈" : "📉"}
+                            color={yearlyPercentChange >= 0 ? "red" : "green"}
+                            subtitle={yearlyPercentChange >= 0 ? "เพิ่มขึ้น" : "ลดลง"}
+                        />
+                    </div>
+                    
                     <div className="mb-4 sm:mb-6">
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                             <input type="text" placeholder="ค้นหา..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto" />
@@ -931,6 +1480,11 @@
                 const previousMonthTotal = previousMonthData.reduce((sum, item) => sum + calculateTotalCost(item), 0);
                 
                 const difference = currentMonthTotal - previousMonthTotal;
+                
+                // คำนวณเปอร์เซ็นต์การเปลี่ยนแปลงค่าใช้จ่าย
+                const percentageChange = previousMonthTotal > 0 
+                    ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100 
+                    : 0;
 
                 return {
                     currentMonthData,
@@ -938,6 +1492,7 @@
                     currentMonthTotal,
                     previousMonthTotal,
                     difference,
+                    percentageChange,
                     prevMonth,
                     prevYear
                 };
@@ -996,7 +1551,7 @@
                         </div>
                     ) : (
                         <div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                 <SummaryCard 
                                     title={`ยอดซ่อม ${['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][selectedMonth]} ${selectedYear + 543}`}
                                     value={formatPrice(comparisonData.currentMonthTotal)}
@@ -1019,6 +1574,16 @@
                                     color={comparisonData.difference >= 0 ? 
                                         { bg: 'bg-red-100', icon: 'text-red-600', border: 'border-red-500' } : 
                                         { bg: 'bg-green-100', icon: 'text-green-600', border: 'border-green-500' }}
+                                />
+                                <SummaryCard 
+                                    title="% การเปลี่ยนแปลง"
+                                    value={Math.abs(comparisonData.percentageChange).toFixed(1)}
+                                    unit="%"
+                                    icon={comparisonData.percentageChange >= 0 ? <Icons name="up"/> : <Icons name="down"/>}
+                                    color={comparisonData.percentageChange >= 0 ? 
+                                        { bg: 'bg-red-100', icon: 'text-red-600', border: 'border-red-500' } : 
+                                        { bg: 'bg-green-100', icon: 'text-green-600', border: 'border-green-500' }}
+                                    footer={`เทียบกับ ${['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][comparisonData.prevMonth]} ${comparisonData.prevYear + 543}`}
                                 />
                             </div>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1742,6 +2307,243 @@
             );
         };
 
+        const BatteryPerformanceAnalysis = ({ vehicleData, evConfig }) => {
+            const batteryAnalysis = useMemo(() => {
+                if (!vehicleData || vehicleData.length === 0) return [];
+
+                const analysis = vehicleData.map(vehicle => {
+                    const config = evConfig[vehicle.licensePlate];
+                    if (!config) return null;
+
+                    // คำนวณประสิทธิภาพแบตเตอรี่แบบขั้นสูง
+                    const avgKwhPerCharge = vehicle.totalKwh / vehicle.count;
+                    const avgCostPerKwh = vehicle.totalCost / vehicle.totalKwh;
+                    const chargingFrequency = vehicle.count; // จำนวนครั้งที่ชาร์จ
+                    
+                    // ประเมินประสิทธิภาพรวมปัจจัย SOC, DoD และ Cycle Efficiency
+                    const standardKwhPerCharge = 16; // kWh มาตรฐานต่อการชาร์จ
+                    
+                    // ประมาณค่า SOC และ DoD จากรูปแบบการใช้งาน
+                    const usageRatio = avgKwhPerCharge / standardKwhPerCharge;
+                    const estimatedSOC = Math.max(20, Math.min(90, 100 - (usageRatio - 1) * 50)); // SOC 20-90%
+                    const estimatedDoD = Math.min(80, usageRatio * 60); // DoD 0-80%
+                    const cycleEfficiency = 0.92; // ประสิทธิภาพรอบการชาร์จ 92%
+                    
+                    // ปัจจัยปรับแต่งตาม SOC และ DoD
+                    const socFactor = estimatedSOC > 80 ? 0.95 : (estimatedSOC < 30 ? 0.85 : 1.0);
+                    const dodFactor = estimatedDoD > 70 ? 0.90 : (estimatedDoD < 20 ? 0.95 : 1.0);
+                    
+                    // คำนวณประสิทธิภาพรวม
+                    const baseEfficiency = (avgKwhPerCharge / standardKwhPerCharge) * 100;
+                    const efficiency = (baseEfficiency * socFactor * dodFactor * cycleEfficiency).toFixed(1);
+                    
+                    // สถานะแบตเตอรี่ตามประสิทธิภาพ (ยิ่งใกล้ 100% ยิ่งดี)
+                    let batteryStatus = 'ดีเยี่ยม';
+                    let statusColor = 'text-green-600';
+                    if (efficiency > 120 || efficiency < 60) {
+                        batteryStatus = 'ต้องตรวจสอบ';
+                        statusColor = 'text-red-600';
+                    } else if (efficiency > 110 || efficiency < 80) {
+                        batteryStatus = 'ปานกลาง';
+                        statusColor = 'text-yellow-600';
+                    } else if (efficiency > 105 || efficiency < 95) {
+                        batteryStatus = 'ดี';
+                        statusColor = 'text-blue-600';
+                    }
+
+                    return {
+                        licensePlate: vehicle.licensePlate,
+                        totalKwh: vehicle.totalKwh,
+                        totalCost: vehicle.totalCost,
+                        count: vehicle.count,
+                        avgKwhPerCharge,
+                        avgCostPerKwh,
+                        efficiency: parseFloat(efficiency),
+                        batteryStatus,
+                        statusColor,
+                        chargingFrequency,
+                        estimatedSOC: estimatedSOC.toFixed(1),
+                        estimatedDoD: estimatedDoD.toFixed(1),
+                        cycleEfficiency: (cycleEfficiency * 100).toFixed(1),
+                        socFactor: socFactor.toFixed(2),
+                        dodFactor: dodFactor.toFixed(2)
+                    };
+                }).filter(Boolean);
+
+                return analysis.sort((a, b) => b.efficiency - a.efficiency);
+            }, [vehicleData, evConfig]);
+
+            if (batteryAnalysis.length === 0) return null;
+
+            return (
+                <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-3">การวิเคราะห์ประสิทธิภาพแบตเตอรี่รถ EV</h3>
+                    <div className="overflow-x-auto border rounded-lg bg-white shadow-sm">
+                        <table className="w-full text-sm">
+                            <thead className="bg-slate-100">
+                                <tr>
+                                    <th className="px-3 py-2 text-left font-medium text-slate-600">ทะเบียนรถ</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ประสิทธิภาพ (%)</th>
+                                    <th className="px-3 py-2 text-center font-medium text-slate-600">สถานะแบตเตอรี่</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">SOC (%)</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">DoD (%)</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">Cycle Eff (%)</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">เฉลี่ย kWh/ครั้ง</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ค่าไฟ/kWh</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ความถี่การชาร์จ</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ค่าไฟรวม</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {batteryAnalysis.map((item) => (
+                                    <tr key={item.licensePlate} className="border-t hover:bg-slate-50">
+                                        <td className="px-3 py-2 font-medium text-slate-700">{item.licensePlate}</td>
+                                        <td className="px-3 py-2 text-right font-semibold">
+                                            <span className={item.efficiency >= 95 ? 'text-green-600' : item.efficiency >= 85 ? 'text-blue-600' : item.efficiency >= 70 ? 'text-yellow-600' : 'text-red-600'}>
+                                                {item.efficiency}%
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-center">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.statusColor} bg-opacity-10`}>
+                                                {item.batteryStatus}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{item.estimatedSOC}%</td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{item.estimatedDoD}%</td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{item.cycleEfficiency}%</td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{formatNumber(item.avgKwhPerCharge)} kWh</td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{formatPrice(item.avgCostPerKwh)} บาท</td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{item.chargingFrequency} ครั้ง</td>
+                                        <td className="px-3 py-2 text-right font-semibold text-sky-700">{formatPrice(item.totalCost)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-3 text-xs text-slate-500">
+                        <p>* ประสิทธิภาพคำนวณจากการเปรียบเทียบกับค่ามาตรฐาน 16 kWh ต่อการชาร์จ (100% = ใช้ไฟตามมาตรฐาน)</p>
+                        <p>* สถานะแบตเตอรี่: ดีเยี่ยม (95-105%), ดี (80-94% หรือ 106-110%), ปานกลาง (60-79% หรือ 111-120%), ต้องตรวจสอบ (&lt;60% หรือ &gt;120%)</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdvancedBatteryMetrics = ({ vehicleData, evConfig }) => {
+            const advancedMetrics = useMemo(() => {
+                if (!vehicleData || vehicleData.length === 0) return [];
+
+                return vehicleData.map(vehicle => {
+                    const config = evConfig[vehicle.licensePlate];
+                    if (!config) return null;
+
+                    const avgKwhPerCharge = vehicle.totalKwh / vehicle.count;
+                    const chargingFrequency = vehicle.count;
+                    
+                    // Battery Health Score (0-100)
+                    const usageRatio = avgKwhPerCharge / 16;
+                    const frequencyFactor = Math.min(1, chargingFrequency / 30); // ปกติ 30 ครั้ง/เดือน
+                    const healthScore = Math.max(0, Math.min(100, 100 - (Math.abs(usageRatio - 1) * 20) - (frequencyFactor > 0.8 ? (frequencyFactor - 0.8) * 50 : 0)));
+                    
+                    // Temperature Impact Estimation (สมมติจากการใช้งาน)
+                    const tempImpact = usageRatio > 1.2 ? 'สูง' : usageRatio > 0.8 ? 'ปานกลาง' : 'ต่ำ';
+                    const tempColor = tempImpact === 'สูง' ? 'text-red-600' : tempImpact === 'ปานกลาง' ? 'text-yellow-600' : 'text-green-600';
+                    
+                    // Charging Pattern Analysis
+                    const avgChargePerDay = chargingFrequency / 30; // สมมติ 30 วัน
+                    let chargingPattern = 'ปกติ';
+                    let patternColor = 'text-blue-600';
+                    if (avgChargePerDay > 2) {
+                        chargingPattern = 'บ่อยเกินไป';
+                        patternColor = 'text-red-600';
+                    } else if (avgChargePerDay < 0.5) {
+                        chargingPattern = 'น้อยเกินไป';
+                        patternColor = 'text-orange-600';
+                    } else if (avgChargePerDay > 1.5) {
+                        chargingPattern = 'ค่อนข้างบ่อย';
+                        patternColor = 'text-yellow-600';
+                    }
+                    
+                    // Battery Degradation Estimate (% per year)
+                    const degradationRate = Math.max(1, Math.min(8, 2 + (Math.abs(usageRatio - 1) * 3) + (frequencyFactor > 0.8 ? 2 : 0)));
+                    
+                    // Optimal Charging Recommendation
+                    let recommendation = 'ใช้งานได้ตามปกติ';
+                    if (healthScore < 70) {
+                        recommendation = 'ควรตรวจสอบแบตเตอรี่';
+                    } else if (avgChargePerDay > 2) {
+                        recommendation = 'ลดความถี่การชาร์จ';
+                    } else if (usageRatio > 1.3) {
+                        recommendation = 'ลดการใช้งานหนัก';
+                    }
+
+                    return {
+                        licensePlate: vehicle.licensePlate,
+                        healthScore: healthScore.toFixed(1),
+                        tempImpact,
+                        tempColor,
+                        chargingPattern,
+                        patternColor,
+                        avgChargePerDay: avgChargePerDay.toFixed(1),
+                        degradationRate: degradationRate.toFixed(1),
+                        recommendation
+                    };
+                }).filter(Boolean);
+            }, [vehicleData, evConfig]);
+
+            if (advancedMetrics.length === 0) return null;
+
+            return (
+                <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-3">เมตริกขั้นสูงสำหรับแบตเตอรี่ EV</h3>
+                    <div className="overflow-x-auto border rounded-lg bg-white shadow-sm">
+                        <table className="w-full text-sm">
+                            <thead className="bg-slate-100">
+                                <tr>
+                                    <th className="px-3 py-2 text-left font-medium text-slate-600">ทะเบียนรถ</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">Health Score</th>
+                                    <th className="px-3 py-2 text-center font-medium text-slate-600">อุณหภูมิกระทบ</th>
+                                    <th className="px-3 py-2 text-center font-medium text-slate-600">รูปแบบการชาร์จ</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">ชาร์จ/วัน</th>
+                                    <th className="px-3 py-2 text-right font-medium text-slate-600">การเสื่อม/ปี (%)</th>
+                                    <th className="px-3 py-2 text-left font-medium text-slate-600">คำแนะนำ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {advancedMetrics.map((item) => (
+                                    <tr key={item.licensePlate} className="border-t hover:bg-slate-50">
+                                        <td className="px-3 py-2 font-medium text-slate-700">{item.licensePlate}</td>
+                                        <td className="px-3 py-2 text-right font-semibold">
+                                            <span className={item.healthScore >= 80 ? 'text-green-600' : item.healthScore >= 60 ? 'text-yellow-600' : 'text-red-600'}>
+                                                {item.healthScore}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-center">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.tempColor} bg-opacity-10`}>
+                                                {item.tempImpact}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-center">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.patternColor} bg-opacity-10`}>
+                                                {item.chargingPattern}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{item.avgChargePerDay}</td>
+                                        <td className="px-3 py-2 text-right text-slate-600">{item.degradationRate}%</td>
+                                        <td className="px-3 py-2 text-slate-600 text-xs">{item.recommendation}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-3 text-xs text-slate-500">
+                        <p>* Health Score: คะแนนสุขภาพแบตเตอรี่ (100 = ดีที่สุด, 0 = ต้องเปลี่ยน)</p>
+                        <p>* การเสื่อม/ปี: ประมาณการอัตราการเสื่อมสภาพของแบตเตอรี่ต่อปี</p>
+                        <p>* อุณหภูมิกระทบ: ประเมินผลกระทบจากอุณหภูมิต่อประสิทธิภาพแบตเตอรี่</p>
+                    </div>
+                </div>
+            );
+        };
+
         const VehicleCostSummaryTable = ({ summaryData, onVehicleSelect }) => {
             if (!summaryData || summaryData.length === 0) return null;
 
@@ -1912,6 +2714,15 @@
             const [selectedMonth, setSelectedMonth] = useState('all');
             const [selectedVehicleDetails, setSelectedVehicleDetails] = useState(null);
 
+            // EV Configuration for battery analysis
+            const EV_CONFIG = {
+                'TT-19': { name: 'TT-19', price: 533930 },
+                'TT-20': { name: 'TT-20', price: 1660000 },
+                'TT-21': { name: 'TT-21', price: 1660000 },
+                'TT-22': { name: 'TT-22', price: 1660000 },
+                'TT-23': { name: 'TT-23', price: 1660000 },
+            };
+
             const { uniqueYears } = useMemo(() => {
                 const years = new Set(data.map(item => parseDate(item.date)?.getFullYear()).filter(Boolean));
                 return { uniqueYears: Array.from(years).sort((a, b) => b - a) };
@@ -2017,11 +2828,13 @@
                 const summary = filteredData.reduce((acc, item) => {
                     const vehicle = item.licensePlate || 'ไม่ระบุ';
                     const cost = parseFloat(item.electricityCost) || 0;
+                    const kwh = parseFloat(item.units) || 0;
 
                     if (!acc[vehicle]) {
-                        acc[vehicle] = { totalCost: 0, count: 0 };
+                        acc[vehicle] = { totalCost: 0, totalKwh: 0, count: 0 };
                     }
                     acc[vehicle].totalCost += cost;
+                    acc[vehicle].totalKwh += kwh;
                     acc[vehicle].count++;
                     return acc;
                 }, {});
@@ -2030,6 +2843,7 @@
                     .map(([licensePlate, data]) => ({
                         licensePlate,
                         totalCost: data.totalCost,
+                        totalKwh: data.totalKwh,
                         count: data.count,
                     }))
                     .sort((a, b) => b.totalCost - a.totalCost);
@@ -2135,6 +2949,8 @@
                     </div>
                     
                     <EVChargingCharts chartData={chartData} />
+                    <BatteryPerformanceAnalysis vehicleData={vehicleCostSummary} evConfig={EV_CONFIG} />
+                    <AdvancedBatteryMetrics vehicleData={vehicleCostSummary} evConfig={EV_CONFIG} />
                     <VehicleCostSummaryTable summaryData={vehicleCostSummary} onVehicleSelect={setSelectedVehicleDetails} />
 
                     <h3 className="text-lg font-semibold text-slate-800 mb-3 mt-8">รายละเอียดการชาร์จรายเดือน/สัปดาห์</h3>
@@ -2189,7 +3005,595 @@
         // ##################################################################
         // ### ENERGY COMPARISON APP (START) ###
         // ##################################################################
+        const MonthlyComparisonLineChart = ({ data, currentYear, previousYear }) => {
+            const chartRef = React.useRef(null);
+            const chartInstance = React.useRef(null);
+            
+            const labels = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const previousYearData = data.map(d => d.previousYear);
+            const currentYearData = data.map(d => d.currentYear);
+            
+            React.useEffect(() => {
+                if (chartRef.current) {
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    // Destroy existing chart
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                    
+                    // Calculate smooth trend line using moving average
+                    const calculateSmoothTrend = (data) => {
+                        const smoothedData = [];
+                        const windowSize = 3; // 3-month moving average
+                        
+                        for (let i = 0; i < data.length; i++) {
+                            let sum = 0;
+                            let count = 0;
+                            
+                            // Calculate moving average with available data points
+                            for (let j = Math.max(0, i - Math.floor(windowSize/2)); 
+                                 j <= Math.min(data.length - 1, i + Math.floor(windowSize/2)); j++) {
+                                if (data[j] !== null && data[j] !== undefined) {
+                                    sum += data[j];
+                                    count++;
+                                }
+                            }
+                            
+                            smoothedData[i] = count > 0 ? sum / count : data[i];
+                        }
+                        
+                        return smoothedData;
+                    };
+                    
+                    const currentYearTrend = calculateSmoothTrend(currentYearData);
+                    const previousYearTrend = calculateSmoothTrend(previousYearData);
+                    
+                    const chartData = {
+                        labels: labels,
+                        datasets: [{
+                            type: 'bar',
+                            label: `ปี ${previousYear + 543}`,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            data: previousYearData,
+                            order: 2
+                        }, {
+                            type: 'bar',
+                            label: `ปี ${currentYear + 543}`,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: '#10b981',
+                            borderWidth: 1,
+                            data: currentYearData,
+                            order: 2
+                        }, {
+                            type: 'line',
+                            label: `แนวโน้ม ปี ${previousYear + 543}`,
+                            borderColor: '#1e40af',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            borderDash: [8, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            data: previousYearTrend,
+                            order: 1,
+                            tension: 0.4
+                        }, {
+                            type: 'line',
+                            label: `แนวโน้ม ปี ${currentYear + 543}`,
+                            borderColor: '#059669',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            borderDash: [8, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            data: currentYearTrend,
+                            order: 1,
+                            tension: 0.4
+                        }]
+                    };
+                    
+                    const config = {
+                        type: 'bar',
+                        data: chartData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `เปรียบเทียบค่าน้ำมันรายเดือน: ปี ${previousYear + 543} vs ปี ${currentYear + 543}`,
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    },
+                                    color: '#374151'
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        usePointStyle: true,
+                                        padding: 20,
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleColor: '#fff',
+                                    bodyColor: '#fff',
+                                    borderColor: '#374151',
+                                    borderWidth: 1,
+                                    cornerRadius: 8,
+                                    displayColors: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.parsed.y;
+                                            if (value === null || value === undefined) return null;
+                                            return `${context.dataset.label}: ${formatPrice(value)} บาท`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        font: {
+                                            size: 11
+                                        },
+                                        color: '#6b7280'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(156, 163, 175, 0.3)'
+                                    },
+                                    ticks: {
+                                        font: {
+                                            size: 11
+                                        },
+                                        color: '#6b7280',
+                                        callback: function(value) {
+                                            return formatPrice(value) + ' บาท';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
+                    chartInstance.current = new Chart(ctx, config);
+                }
+                
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [data, currentYear, previousYear]);
+            
+            return (
+                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <div className="relative h-96">
+                        <canvas ref={chartRef}></canvas>
+                    </div>
+                </div>
+            );
+        };
+        
+        // Progress Bar Component สำหรับแสดงการเปรียบเทียบ
+        const ComparisonProgressBar = ({ currentValue, previousValue, title, unit = "บาท" }) => {
+            const difference = currentValue - previousValue;
+            const percentageChange = previousValue > 0 ? ((difference / previousValue) * 100) : 0;
+            const isIncrease = difference > 0;
+            const isSaving = difference < 0;
+            
+            // คำนวณความกว้างของ progress bar (0-100%)
+            const maxValue = Math.max(currentValue, previousValue);
+            const currentPercentage = maxValue > 0 ? (currentValue / maxValue) * 100 : 0;
+            const previousPercentage = maxValue > 0 ? (previousValue / maxValue) * 100 : 0;
+            
+            return (
+                <div className="bg-white p-6 rounded-lg shadow-md border">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+                    
+                    {/* เดือนที่แล้ว */}
+                    <div className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-gray-600">เดือนที่แล้ว</span>
+                            <span className="text-sm font-semibold text-blue-600">{formatPrice(previousValue)} {unit}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div 
+                                className="bg-blue-500 h-3 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${previousPercentage}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                    
+                    {/* เดือนปัจจุบัน */}
+                    <div className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-gray-600">เดือนปัจจุบัน</span>
+                            <span className={`text-sm font-semibold ${isIncrease ? 'text-red-600' : 'text-green-600'}`}>
+                                {formatPrice(currentValue)} {unit}
+                            </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div 
+                                className={`h-3 rounded-full transition-all duration-500 ease-out ${
+                                    isIncrease ? 'bg-red-500' : 'bg-green-500'
+                                }`}
+                                style={{ width: `${currentPercentage}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                    
+                    {/* ผลต่าง */}
+                    <div className={`p-4 rounded-lg ${
+                        isSaving ? 'bg-green-50 border border-green-200' : 
+                        isIncrease ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-gray-200'
+                    }`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <div className={`w-3 h-3 rounded-full mr-2 ${
+                                    isSaving ? 'bg-green-500' : 
+                                    isIncrease ? 'bg-red-500' : 'bg-gray-500'
+                                }`}></div>
+                                <span className="text-sm font-medium text-gray-700">
+                                    {isSaving ? 'ประหยัด' : isIncrease ? 'เพิ่มขึ้น' : 'ไม่เปลี่ยนแปลง'}
+                                </span>
+                            </div>
+                            <div className="text-right">
+                                <div className={`text-lg font-bold ${
+                                    isSaving ? 'text-green-600' : 
+                                    isIncrease ? 'text-red-600' : 'text-gray-600'
+                                }`}>
+                                    {formatPrice(Math.abs(difference))} {unit}
+                                </div>
+                                <div className={`text-sm ${
+                                    isSaving ? 'text-green-500' : 
+                                    isIncrease ? 'text-red-500' : 'text-gray-500'
+                                }`}>
+                                    {Math.abs(percentageChange).toFixed(1)}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ##################################################################
+        // ### CARBON REDUCTION CALCULATION FUNCTIONS ###
+        // ##################################################################
+        
+        // Emission factors (kg CO2 per liter) from TGO Thailand <mcreference link="https://thaicarbonlabel.tgo.or.th/index.php?lang=EN&mod=YjNKbllXNXBlbUYwYVc5dVgyVnRhWE56YVc5dQ" index="1">1</mcreference>
+        const EMISSION_FACTORS = {
+            gasoline: 2.181564,  // Motor gasoline
+            diesel: 2.698722     // Gas/Diesel oil
+        };
+        
+        // Function to calculate carbon reduction from fuel savings
+        const calculateCarbonReduction = (fuelSavingsLiters, fuelType = 'diesel') => {
+            const emissionFactor = EMISSION_FACTORS[fuelType] || EMISSION_FACTORS.diesel;
+            return fuelSavingsLiters * emissionFactor; // kg CO2
+        };
+        
+        // Function to estimate fuel consumption from cost (approximate)
+        const estimateFuelConsumptionFromCost = (fuelCost, avgFuelPrice = 35) => {
+            return fuelCost / avgFuelPrice; // liters (approximate)
+        };
+        
+        // Function to calculate carbon reduction from cost savings
+        const calculateCarbonReductionFromCostSavings = (costSavings, avgFuelPrice = 35, fuelType = 'diesel') => {
+            if (costSavings <= 0) return 0;
+            const fuelSavingsLiters = estimateFuelConsumptionFromCost(costSavings, avgFuelPrice);
+            return calculateCarbonReduction(fuelSavingsLiters, fuelType);
+        };
+        
+        // Function to format carbon reduction display
+        const formatCarbonReduction = (carbonKg) => {
+            if (carbonKg >= 1000) {
+                return `${(carbonKg / 1000).toFixed(2)} ตัน`;
+            } else {
+                return `${carbonKg.toFixed(2)} กก.`;
+            }
+        };
+        
         const EnergyComparisonApp = ({ fuelData, evData }) => {
+            const today = new Date();
+            const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+            const [selectedMonth, setSelectedMonth] = useState(today.getMonth()); // เดือนปัจจุบัน
+            
+            // ตรวจสอบข้อมูล
+            if (!fuelData || !fuelData.supply) {
+                return (
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">เปรียบเทียบค่าใช้จ่ายน้ำมันรายเดือน</h2>
+                        <div className="text-center p-8 text-gray-600">
+                            <p>ไม่พบข้อมูลน้ำมัน กรุณารอสักครู่...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            const { uniqueYears, availableMonths } = useMemo(() => {
+                const years = new Set();
+                const months = new Set();
+                const supply = fuelData?.supply || [];
+                supply.forEach(item => {
+                    const date = parseDate(item['วันที่']);
+                    if (date) {
+                        years.add(date.getFullYear());
+                        if (date.getFullYear() === selectedYear) {
+                            months.add(date.getMonth());
+                        }
+                    }
+                });
+                
+                // ถ้าไม่มีข้อมูลปี ให้ใช้ปีปัจจุบัน
+                if (years.size === 0) {
+                    const currentYear = new Date().getFullYear();
+                    years.add(currentYear);
+                }
+                
+                return { 
+                    uniqueYears: Array.from(years).sort((a, b) => b - a),
+                    availableMonths: Array.from(months).sort((a, b) => a - b)
+                };
+            }, [fuelData, selectedYear]);
+
+            const comparisonData = useMemo(() => {
+                const fuel = (fuelData?.supply || []).filter(item => item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา');
+
+                const getMonthlyFuelCost = (year, month) => {
+                    return fuel.filter(item => {
+                        const date = parseDate(item['วันที่']);
+                        if (!date) return false;
+                        return date.getFullYear() === year && date.getMonth() === month;
+                    }).reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                };
+
+                const currentMonthCost = getMonthlyFuelCost(selectedYear, selectedMonth);
+                const previousMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+                const previousMonthYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+                const previousMonthCost = getMonthlyFuelCost(previousMonthYear, previousMonth);
+                
+                const difference = currentMonthCost - previousMonthCost;
+                const percentageChange = previousMonthCost > 0 ? ((difference / previousMonthCost) * 100) : 0;
+                
+                // คำนวณค่าเฉลี่ยต่อวัน
+                const daysInCurrentMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+                const daysInPreviousMonth = new Date(previousMonthYear, previousMonth + 1, 0).getDate();
+                const avgCurrentMonthPerDay = currentMonthCost / daysInCurrentMonth;
+                const avgPreviousMonthPerDay = previousMonthCost / daysInPreviousMonth;
+                const avgDailyDifference = avgCurrentMonthPerDay - avgPreviousMonthPerDay;
+                
+                // คำนวณค่าน้ำมันทั้งปี
+                const getYearlyFuelCost = (year) => {
+                    return fuel.filter(item => {
+                        const date = parseDate(item['วันที่']);
+                        if (!date) return false;
+                        return date.getFullYear() === year;
+                    }).reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                };
+                
+                const currentYearTotal = getYearlyFuelCost(selectedYear);
+                const previousYearTotal = getYearlyFuelCost(selectedYear - 1);
+                
+                // คำนวณเปอร์เซ็นต์การประหยัดน้ำมันและการลดคาร์บอน
+                const yearlyFuelSavings = previousYearTotal - currentYearTotal;
+                const yearlyFuelSavingsPercentage = previousYearTotal > 0 ? ((yearlyFuelSavings / previousYearTotal) * 100) : 0;
+                const yearlyCarbonReduction = yearlyFuelSavings > 0 ? calculateCarbonReductionFromCostSavings(yearlyFuelSavings) : 0;
+                const previousYearCarbonTotal = calculateCarbonReductionFromCostSavings(previousYearTotal);
+                const yearlyCarbonReductionPercentage = previousYearCarbonTotal > 0 ? ((yearlyCarbonReduction / previousYearCarbonTotal) * 100) : 0;
+
+                return {
+                    currentMonthCost,
+                    previousMonthCost,
+                    difference,
+                    percentageChange,
+                    avgCurrentMonthPerDay,
+                    avgPreviousMonthPerDay,
+                    avgDailyDifference,
+                    currentMonthName: getThaiMonthName(selectedMonth),
+                    previousMonthName: getThaiMonthName(previousMonth),
+                    previousMonthYear,
+                    currentYearTotal,
+                    previousYearTotal,
+                    yearlyFuelSavings,
+                    yearlyFuelSavingsPercentage,
+                    yearlyCarbonReduction,
+                    yearlyCarbonReductionPercentage
+                };
+
+            }, [fuelData, selectedYear, selectedMonth]);
+
+
+
+            return (
+                <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">เปรียบเทียบค่าใช้จ่ายน้ำมันรายเดือน</h2>
+                    <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2">
+                        <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
+                            {uniqueYears.map(y => <option key={y} value={y}>{y + 543}</option>)}
+                        </select>
+                        <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
+                            {availableMonths.map(month => <option key={month} value={month}>{getThaiMonthName(month)}</option>)}
+                        </select>
+                    </div>
+
+                    {/* เปรียบเทียบข้อมูลเดือนปัจจุบันกับเดือนที่แล้ว */}
+                    <div className="mb-6">
+                        <div className="text-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-800">
+                                เปรียบเทียบ {comparisonData.currentMonthName} {selectedYear + 543} กับ {comparisonData.previousMonthName} {comparisonData.previousMonthYear + 543}
+                            </h3>
+                        </div>
+                        
+                        <ComparisonProgressBar 
+                            currentValue={comparisonData.currentMonthCost}
+                            previousValue={comparisonData.previousMonthCost}
+                            title="ค่าใช้จ่ายน้ำมันรวม"
+                            unit="บาท"
+                        />
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+                        <SummaryCard 
+                            title={`${comparisonData.currentMonthName} ${selectedYear + 543}`}
+                            value={formatPrice(comparisonData.currentMonthCost)}
+                            unit="บาท"
+                            icon={<img src="https://img.icons8.com/?size=80&id=93a3SInn9e4L&format=png" className="w-8 h-8"/>}
+                            color={{bg:'bg-blue-100', border:'border-blue-500'}}
+                        />
+                        <SummaryCard 
+                            title={`${comparisonData.previousMonthName} ${comparisonData.previousMonthYear + 543}`}
+                            value={formatPrice(comparisonData.previousMonthCost)}
+                            unit="บาท"
+                            icon={<img src="https://img.icons8.com/?size=80&id=93a3SInn9e4L&format=png" className="w-8 h-8"/>}
+                            color={{bg:'bg-gray-100', border:'border-gray-500'}}
+                        />
+                        <SummaryCard 
+                            title="ค่าเฉลี่ยต่อวัน"
+                            value={formatPrice(Math.abs(comparisonData.avgDailyDifference))}
+                            unit={comparisonData.avgDailyDifference >= 0 ? "บาท/วัน (เพิ่ม)" : "บาท/วัน (ลด)"}
+                            icon={<Icons name="balance"/>}
+                            color={{bg: comparisonData.avgDailyDifference >= 0 ? 'bg-red-100' : 'bg-green-100', border: comparisonData.avgDailyDifference >= 0 ? 'border-red-500' : 'border-green-500'}}
+                        />
+                        <SummaryCard 
+                            title="การลดคาร์บอนตลอดทั้งปี"
+                            value={comparisonData.currentYearTotal < comparisonData.previousYearTotal ? formatCarbonReduction(calculateCarbonReductionFromCostSavings(comparisonData.previousYearTotal - comparisonData.currentYearTotal)) : '0 กก.'}
+                            unit="CO₂"
+                            icon={<span className="text-2xl">🌱</span>}
+                            color={{bg:'bg-green-100', border:'border-green-500'}}
+                            footerText={comparisonData.currentYearTotal < comparisonData.previousYearTotal ? `จากการประหยัดน้ำมันตลอดทั้งปี ${formatPrice(comparisonData.previousYearTotal - comparisonData.currentYearTotal)} บาท` : 'ไม่มีการประหยัด'}
+                        />
+                        <SummaryCard 
+                            title="% ประหยัดน้ำมัน"
+                            value={comparisonData.yearlyFuelSavingsPercentage > 0 ? comparisonData.yearlyFuelSavingsPercentage.toFixed(2) : '0'}
+                            unit="%"
+                            icon={<span className="text-2xl">⛽</span>}
+                            color={{bg: comparisonData.yearlyFuelSavingsPercentage > 0 ? 'bg-blue-100' : 'bg-gray-100', border: comparisonData.yearlyFuelSavingsPercentage > 0 ? 'border-blue-500' : 'border-gray-500'}}
+                            footerText={`เปรียบเทียบกับปี ${selectedYear - 1 + 543}`}
+                        />
+                        <SummaryCard 
+                            title="% ลดคาร์บอน"
+                            value={comparisonData.yearlyCarbonReductionPercentage > 0 ? comparisonData.yearlyCarbonReductionPercentage.toFixed(2) : '0'}
+                            unit="%"
+                            icon={<span className="text-2xl">🌍</span>}
+                            color={{bg: comparisonData.yearlyCarbonReductionPercentage > 0 ? 'bg-emerald-100' : 'bg-gray-100', border: comparisonData.yearlyCarbonReductionPercentage > 0 ? 'border-emerald-500' : 'border-gray-500'}}
+                            footerText={`เปรียบเทียบกับปี ${selectedYear - 1 + 543}`}
+                        />                    </div>
+
+                    {/* Cards แสดงข้อมูลทุกเดือนในปีที่เลือก */}
+                    <div className="mt-8">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">ข้อมูลค่าใช้จ่ายน้ำมันทุกเดือนในปี {selectedYear + 543}</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {Array.from({length: 12}, (_, index) => {
+                                const month = index + 1;
+                                const supply = fuelData?.supply || [];
+                                const monthData = supply.filter(item => {
+                                    const date = parseDate(item['วันที่']);
+                                    return date && date.getFullYear() === selectedYear && date.getMonth() + 1 === month;
+                                });
+                                
+                                // คำนวณข้อมูลเดือนก่อนหน้า
+                                const previousMonth = month === 1 ? 12 : month - 1;
+                                const previousYear = month === 1 ? selectedYear - 1 : selectedYear;
+                                const previousMonthData = supply.filter(item => {
+                                    const date = parseDate(item['วันที่']);
+                                    return date && date.getFullYear() === previousYear && date.getMonth() + 1 === previousMonth;
+                                });
+                                
+                                const monthCost = monthData.reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                                const previousMonthCost = previousMonthData.reduce((sum, item) => sum + (Number(item['ราคาน้ำมัน']) || 0), 0);
+                                const savings = previousMonthCost - monthCost; // ประหยัด = เดือนก่อน - เดือนปัจจุบัน
+                                const monthName = getThaiMonthName(month);
+                                const hasData = monthData.length > 0;
+                                const hasPreviousData = previousMonthData.length > 0;
+                                
+                                return (
+                                    <div key={month} className={`p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                                        hasData 
+                                            ? month === selectedMonth + 1
+                                                ? 'bg-blue-50 border-blue-500 shadow-md' 
+                                                : 'bg-white border-gray-200 hover:border-blue-300'
+                                            : 'bg-gray-50 border-gray-200 opacity-60'
+                                    }`}>
+                                        <div className="text-center">
+                                            <div className={`text-sm font-medium mb-2 ${
+                                                hasData ? 'text-gray-700' : 'text-gray-400'
+                                            }`}>
+                                                {monthName}
+                                            </div>
+                                            <div className={`text-lg font-bold ${
+                                                hasData 
+                                                    ? month === selectedMonth + 1
+                                                        ? 'text-blue-600' 
+                                                        : 'text-gray-800'
+                                                    : 'text-gray-400'
+                                            }`}>
+                                                {hasData ? formatPrice(monthCost) : '0'}
+                                            </div>
+                                            <div className={`text-xs ${
+                                                hasData ? 'text-gray-500' : 'text-gray-400'
+                                            }`}>
+                                                บาท
+                                            </div>
+                                            {hasData && (
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {monthData.length} รายการ
+                                                </div>
+                                            )}
+                                            {hasData && hasPreviousData && (
+                                                <>
+                                                    <div className={`text-xs mt-1 font-medium ${
+                                                        savings > 0 ? 'text-green-600' : 
+                                                        savings < 0 ? 'text-red-600' : 'text-gray-500'
+                                                    }`}>
+                                                        {savings > 0 ? 'ประหยัด ' : savings < 0 ? 'เพิ่มขึ้น ' : 'เท่าเดิม '}
+                                                        {Math.abs(savings) > 0 ? formatPrice(Math.abs(savings)) : '0'}
+                                                    </div>
+                                                    {savings > 0 && (
+                                                        <div className="text-xs mt-1 text-green-700 font-medium">
+                                                            <span className="text-green-600">🌱</span> ลดคาร์บอน {formatCarbonReduction(calculateCarbonReductionFromCostSavings(savings))}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                            {hasData && !hasPreviousData && (
+                                                <div className="text-xs text-gray-400 mt-1">
+                                                    ไม่มีข้อมูลเปรียบเทียบ
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // ##################################################################
+        // ### EV IMPACT APP (START) ###
+        // ##################################################################
+        const EVImpactApp = ({ fuelData, evData }) => {
             const today = new Date();
             const [selectedYear, setSelectedYear] = useState(today.getFullYear());
             const [selectedMonth, setSelectedMonth] = useState('all'); // 'all' for the whole year
@@ -2200,299 +3604,100 @@
                     const date = parseDate(item['วันที่']);
                     if (date) years.add(date.getFullYear());
                 });
-                (evData || []).forEach(item => {
-                    const date = parseDate(item.date);
-                    if (date) years.add(date.getFullYear());
-                });
                 return { uniqueYears: Array.from(years).sort((a, b) => b - a) };
-            }, [fuelData, evData]);
+            }, [fuelData]);
 
             const comparisonData = useMemo(() => {
-                const year = selectedYear;
+                const currentYear = selectedYear;
+                const previousYear = selectedYear - 1;
                 
                 const fuel = (fuelData?.supply || []).filter(item => item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา');
-                const ev = evData || [];
-
-                const getFilteredCost = (data, dateField, costField, month) => {
-                    return data.filter(item => {
-                        const date = parseDate(item[dateField]);
-                        if (!date) return false;
-                        const yearMatch = date.getFullYear() === year;
-                        const monthMatch = month === 'all' || date.getMonth() === month;
-                        return yearMatch && monthMatch;
-                    }).reduce((sum, item) => sum + (Number(item[costField]) || 0), 0);
-                };
-
-                const totalFuelCost = getFilteredCost(fuel, 'วันที่', 'ราคาน้ำมัน', selectedMonth);
-                const totalEvCost = getFilteredCost(ev, 'date', 'electricityCost', selectedMonth);
-                const totalSavings = totalFuelCost - totalEvCost;
-
-                const daysInPeriod = selectedMonth === 'all' 
-                    ? (new Date(year, 11, 31) - new Date(year, 0, 1)) / (1000 * 60 * 60 * 24) + 1
-                    : new Date(year, selectedMonth + 1, 0).getDate();
                 
-                const avgDailySavings = totalSavings / daysInPeriod;
-
-                const monthlyData = Array.from({ length: 12 }).map((_, i) => {
-                    const monthlyFuel = getFilteredCost(fuel, 'วันที่', 'ราคาน้ำมัน', i);
-                    const monthlyEv = getFilteredCost(ev, 'date', 'electricityCost', i);
+                const getYearlyData = (year) => {
+                    const yearData = fuel.filter(item => {
+                        const date = parseDate(item['วันที่']);
+                        return date && date.getFullYear() === year;
+                    });
+                    
+                    const monthlyData = Array(12).fill(0);
+                    let totalCost = 0;
+                    
+                    yearData.forEach(item => {
+                        const date = parseDate(item['วันที่']);
+                        if (date) {
+                            const month = date.getMonth();
+                            const cost = Number(item['ราคาน้ำมัน']) || 0;
+                            monthlyData[month] += cost;
+                            totalCost += cost;
+                        }
+                    });
+                    
+                    return { monthlyData, totalCost };
+                };
+                
+                const currentYearData = getYearlyData(currentYear);
+                const previousYearData = getYearlyData(previousYear);
+                
+                const totalDifference = currentYearData.totalCost - previousYearData.totalCost;
+                const avgDailyDifference = totalDifference / 365;
+                
+                const monthlyChartData = Array(12).fill(0).map((_, month) => {
+                    const currentMonthCost = currentYearData.monthlyData[month];
+                    const previousMonthCost = previousYearData.monthlyData[month];
+                    const difference = currentMonthCost - previousMonthCost;
+                    
                     return {
-                        label: getThaiMonthName(i),
-                        fuel: monthlyFuel,
-                        ev: monthlyEv,
+                        month,
+                        currentYear: currentMonthCost,
+                        previousYear: previousMonthCost,
+                        difference: difference
                     };
                 });
                 
-                const monthlyChartData = monthlyData.map((month, i) => {
-                    const prevMonthFuel = i > 0 ? monthlyData[i-1].fuel : 0;
-                    const fuelSavings = prevMonthFuel - month.fuel;
-                    return {...month, fuelSavings };
-                });
-
-
+                // คำนวณเปอร์เซ็นต์การประหยัดน้ำมันต่อปี
+                const yearlyFuelSavingsPercentage = previousYearData.totalCost > 0 
+                    ? ((previousYearData.totalCost - currentYearData.totalCost) / previousYearData.totalCost) * 100 
+                    : 0;
+                
                 return {
-                    totalFuelCost,
-                    totalEvCost,
-                    totalSavings,
-                    avgDailySavings,
+                    currentYearTotal: currentYearData.totalCost,
+                    previousYearTotal: previousYearData.totalCost,
+                    totalDifference,
+                    avgDailyDifference,
+                    yearlyFuelSavingsPercentage,
                     monthlyChartData
                 };
-
-            }, [fuelData, evData, selectedYear, selectedMonth]);
-
-            const MonthlyComparisonBarChart = ({ data }) => {
-                const maxValue = Math.max(...data.flatMap(d => [d.fuel, d.ev, d.fuelSavings]), 1);
-
-                const BarRow = ({ label, value, colorClass, textColorClass }) => {
-                    const percentage = maxValue > 0 ? (Math.abs(value) / maxValue) * 100 : 0;
-                    const showTextInside = percentage > 20;
-
-                    return (
-                        <div className="flex items-center space-x-2">
-                            <div className={`w-24 text-xs text-right font-medium ${textColorClass}`}>{label}:</div>
-                            <div className="flex-1 flex items-center">
-                                <div className="flex-1 bg-gray-200 rounded-full h-5">
-                                    <div 
-                                        className={`${colorClass} h-5 rounded-full text-white text-xs flex items-center justify-end pr-2`} 
-                                        style={{ width: `${percentage}%` }}
-                                    >
-                                        {showTextInside && formatPrice(value)}
-                                    </div>
-                                </div>
-                                {!showTextInside && <span className="ml-2 text-xs font-medium text-slate-700">{formatPrice(value)}</span>}
-                            </div>
-                        </div>
-                    );
-                };
-
-                return (
-                    <div className="bg-white rounded-lg shadow-md p-4">
-                        <h3 className="font-semibold text-lg mb-4 text-slate-800">เปรียบเทียบค่าใช้จ่ายรายเดือน</h3>
-                        <div className="space-y-4">
-                            {data.map(monthData => {
-                                const isSaving = monthData.fuelSavings >= 0;
-                                return (
-                                    <div key={monthData.label}>
-                                        <div className="font-medium text-sm text-slate-600 mb-2">{monthData.label}</div>
-                                        <div className="space-y-1">
-                                            <BarRow 
-                                                label="ค่าน้ำมัน" 
-                                                value={monthData.fuel} 
-                                                colorClass="bg-blue-500"
-                                                textColorClass="text-blue-700"
-                                            />
-                                            <BarRow 
-                                                label="ค่าไฟ EV" 
-                                                value={monthData.ev} 
-                                                colorClass="bg-green-500"
-                                                textColorClass="text-green-700"
-                                            />
-                                            <BarRow 
-                                                label={isSaving ? "ประหยัดน้ำมัน" : "น้ำมันใช้เพิ่ม"}
-                                                value={monthData.fuelSavings} 
-                                                colorClass={isSaving ? "bg-amber-500" : "bg-red-500"}
-                                                textColorClass={isSaving ? "text-amber-700" : "text-red-700"}
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            };
+            }, [fuelData, selectedYear]);
 
             return (
                 <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4">เปรียบเทียบค่าใช้จ่ายพลังงาน</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">แนวโน้มค่าใช้จ่ายน้ำมันเทียบรายปี</h2>
                     <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2">
                         <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
                             {uniqueYears.map(y => <option key={y} value={y}>{y + 543}</option>)}
                         </select>
                         <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))} className="px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="all">ทุกเดือน</option>
-                            {Array.from({ length: 12 }).map((_, i) => <option key={i} value={i}>{['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'][i]}</option>)}
+                            <option value="all">ทั้งปี</option>
+                            {Array.from({length: 12}, (_, i) => <option key={i} value={i}>{getThaiMonthName(i)}</option>)}
                         </select>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                        <SummaryCard title="ค่าใช้จ่ายน้ำมันรวม" value={formatPrice(comparisonData.totalFuelCost)} unit="บาท" icon={<img src="https://img.icons8.com/?size=80&id=93a3SInn9e4L&format=png" className="w-8 h-8"/>} color={{bg:'bg-blue-100', border:'border-blue-500'}}/>
-                        <SummaryCard title="ค่าใช้จ่าย EV รวม" value={formatPrice(comparisonData.totalEvCost)} unit="บาท" icon={<Icons name="bolt"/>} color={{bg:'bg-green-100', border:'border-green-500'}}/>
-                        <SummaryCard title="ประหยัดได้ทั้งหมด" value={formatPrice(comparisonData.totalSavings)} unit="บาท" icon={<Icons name="balance"/>} color={{bg:'bg-yellow-100', border:'border-yellow-500'}}/>
-                        <SummaryCard title="ประหยัดต่อวัน (เฉลี่ย)" value={formatPrice(comparisonData.avgDailySavings)} unit="บาท" icon={<Icons name="balance"/>} color={{bg:'bg-purple-100', border:'border-purple-500'}}/>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-6">
+                        <SummaryCard title={`ค่าน้ำมันปี ${selectedYear - 1 + 543}`} value={formatPrice(comparisonData.previousYearTotal)} unit="บาท" icon={<Icons name="balance"/>} color={{bg:'bg-blue-100', border:'border-blue-500'}}/>
+                        <SummaryCard title={`ค่าน้ำมันปี ${selectedYear + 543}`} value={formatPrice(comparisonData.currentYearTotal)} unit="บาท" icon={<Icons name="balance"/>} color={{bg:'bg-green-100', border:'border-green-500'}}/>
+                        <SummaryCard title="ผลต่างค่าน้ำมัน" value={formatPrice(Math.abs(comparisonData.totalDifference))} unit={comparisonData.totalDifference >= 0 ? "บาท (เพิ่ม)" : "บาท (ลด)"} icon={<Icons name="balance"/>} color={{bg: comparisonData.totalDifference >= 0 ? 'bg-red-100' : 'bg-yellow-100', border: comparisonData.totalDifference >= 0 ? 'border-red-500' : 'border-yellow-500'}}/>
+                        <SummaryCard title="เปลี่ยนแปลงต่อวัน" value={formatPrice(Math.abs(comparisonData.avgDailyDifference))} unit={comparisonData.avgDailyDifference >= 0 ? "บาท (เพิ่ม)" : "บาท (ลด)"} icon={<Icons name="balance"/>} color={{bg: comparisonData.avgDailyDifference >= 0 ? 'bg-red-100' : 'bg-yellow-100', border: comparisonData.avgDailyDifference >= 0 ? 'border-red-500' : 'border-yellow-500'}}/>
+                        <SummaryCard title="การลดคาร์บอนตลอดทั้งปี" value={formatCarbonReduction(calculateCarbonReductionFromCostSavings(Math.abs(comparisonData.totalDifference)))} unit="CO₂" icon={<Icons name="leaf"/>} color={{bg:'bg-emerald-100', border:'border-emerald-500'}}/>
+                        <SummaryCard 
+                            title="% ประหยัดน้ำมันต่อปี" 
+                            value={comparisonData.yearlyFuelSavingsPercentage >= 0 ? comparisonData.yearlyFuelSavingsPercentage.toFixed(2) : '0.00'} 
+                            unit={comparisonData.yearlyFuelSavingsPercentage >= 0 ? '% (ประหยัด)' : '% (เพิ่มขึ้น)'} 
+                            icon={<span className="text-lg">⛽</span>} 
+                            color={{bg: comparisonData.yearlyFuelSavingsPercentage >= 0 ? 'bg-green-100' : 'bg-red-100', border: comparisonData.yearlyFuelSavingsPercentage >= 0 ? 'border-green-500' : 'border-red-500'}} 
+                            footer={`เปรียบเทียบกับปี ${selectedYear - 1 + 543}`}
+                        />
                     </div>
                     
-                    <MonthlyComparisonBarChart data={comparisonData.monthlyChartData} />
-                </div>
-            );
-        };
-        
-        // ##################################################################
-        // ### EV IMPACT APP (START) ###
-        // ##################################################################
-        const EVImpactApp = ({ fuelData, evData }) => {
-            const EV_START_DATE = new Date('2025-08-01');
-            const EV_START_YEAR = EV_START_DATE.getFullYear();
-            const PREVIOUS_YEAR = EV_START_YEAR - 1;
-
-            const impactData = useMemo(() => {
-                const fuel = (fuelData?.supply || []).filter(item => item['เลขที่ใบเบิก SAP'] !== 'ยอดยกมา');
-                
-                const getMonthlyAverageCost = (data, dateField, costField, isBefore) => {
-                    const today = new Date();
-                    const currentMonth = today.getMonth();
-                    const currentYear = today.getFullYear();
-
-                    const filteredData = data.filter(item => {
-                        const d = parseDate(item[dateField]);
-                        if (!d) return false;
-
-                        // Condition 1: Check if the date is before or after the EV start date
-                        const isWithinEvPeriod = isBefore ? d < EV_START_DATE : d >= EV_START_DATE;
-                        
-                        // Condition 2: Check if the date is before the current month
-                        const isBeforeCurrentMonth = d.getFullYear() < currentYear || (d.getFullYear() === currentYear && d.getMonth() < currentMonth);
-
-                        return isWithinEvPeriod && isBeforeCurrentMonth;
-                    });
-
-                    if (filteredData.length === 0) return 0;
-
-                    const monthlyTotals = {};
-                    
-                    filteredData.forEach(item => {
-                        const d = parseDate(item[dateField]);
-                        if (d) {
-                            const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
-                            if (!monthlyTotals[monthKey]) {
-                                monthlyTotals[monthKey] = 0;
-                            }
-                            monthlyTotals[monthKey] += Number(item[costField]) || 0;
-                        }
-                    });
-                    
-                    const totalCost = Object.values(monthlyTotals).reduce((sum, val) => sum + val, 0);
-                    const monthCount = Object.keys(monthlyTotals).length;
-
-                    return monthCount > 0 ? totalCost / monthCount : 0;
-                };
-
-                const avgFuelCostBefore = getMonthlyAverageCost(fuel, 'วันที่', 'ราคาน้ำมัน', true);
-                const avgFuelCostAfter = getMonthlyAverageCost(fuel, 'วันที่', 'ราคาน้ำมัน', false);
-                const avgEvCostAfter = getMonthlyAverageCost(evData, 'date', 'electricityCost', false);
-                const avgTotalCostAfter = avgFuelCostAfter + avgEvCostAfter;
-                
-                const netSavings = avgFuelCostBefore - avgTotalCostAfter;
-                const reduction = avgFuelCostBefore > 0 ? (netSavings / avgFuelCostBefore) * 100 : 0;
-                
-                const getYearlyMonthlyData = (year) => {
-                    const fuelCost = Array(12).fill(0);
-                    const evCost = Array(12).fill(0);
-
-                    fuel.filter(item => parseDate(item['วันที่'])?.getFullYear() === year)
-                        .forEach(item => {
-                            const month = parseDate(item['วันที่']).getMonth();
-                            fuelCost[month] += Number(item['ราคาน้ำมัน']) || 0;
-                        });
-
-                    evData.filter(item => parseDate(item.date)?.getFullYear() === year)
-                        .forEach(item => {
-                            const month = parseDate(item.date).getMonth();
-                            evCost[month] += Number(item.electricityCost) || 0;
-                        });
-                    
-                    return { fuelCost, evCost };
-                };
-
-                const previousYearCost = getYearlyMonthlyData(PREVIOUS_YEAR).fuelCost;
-                const currentYearCosts = getYearlyMonthlyData(EV_START_YEAR);
-                const currentYearTotalCost = currentYearCosts.fuelCost.map((fc, i) => fc + currentYearCosts.evCost[i]);
-
-                return {
-                    avgBefore: avgFuelCostBefore,
-                    avgAfter: avgTotalCostAfter,
-                    reduction,
-                    netSavings,
-                    previousYearData: previousYearCost,
-                    currentYearData: currentYearTotalCost,
-                };
-            }, [fuelData, evData]);
-            
-             const ImpactLineChart = ({ previousYearData, currentYearData }) => {
-                const labels = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-                const allData = [...previousYearData, ...currentYearData];
-                const maxValue = Math.max(...allData, 1); // Avoid division by zero
-                
-                const dataToPath = (data, color) => {
-                    const points = data.map((point, i) => {
-                        const x = (i / (labels.length - 1)) * 100;
-                        const y = 100 - (point / maxValue) * 95; // Use 95% of height to avoid touching top
-                        return `${x},${y}`;
-                    }).join(' ');
-                    return <polyline fill="none" stroke={color} strokeWidth="2" points={points} />;
-                };
-
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-md mt-6 relative pb-10">
-                         <h3 className="font-semibold text-lg mb-4 text-slate-800">แนวโน้มค่าใช้จ่ายพลังงานเทียบรายปี</h3>
-                         <div className="flex justify-center space-x-4 mb-4 text-sm">
-                            <div className="flex items-center"><div className="w-4 h-1 bg-gray-400 mr-2"></div><span>ค่าน้ำมันปี {PREVIOUS_YEAR + 543}</span></div>
-                            <div className="flex items-center"><div className="w-4 h-1 bg-blue-600 mr-2"></div><span>ค่าพลังงานรวมปี {EV_START_YEAR + 543}</span></div>
-                         </div>
-                         <div className="relative h-64 pl-10 pr-4">
-                            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute top-0 left-0">
-                                {Array.from({length: 5}).map((_, i) => (
-                                    <line key={i} x1="0" y1={i * 25} x2="100" y2={i * 25} stroke="#e2e8f0" strokeWidth="0.5" />
-                                ))}
-                                {dataToPath(previousYearData, '#9ca3af')}
-                                {dataToPath(currentYearData, '#2563eb')}
-                                <line x1={(7 / 11) * 100} y1="0" x2={(7 / 11) * 100} y2="100" stroke="#ef4444" strokeWidth="1" strokeDasharray="4 2" />
-                            </svg>
-                            <div className="absolute -bottom-6 left-0 right-0 flex justify-between text-xs text-gray-500">
-                                {labels.map(label => <span key={label} className="w-1/12 text-center">{label}</span>)}
-                            </div>
-                             <div className="absolute top-0 -left-10 bottom-0 flex flex-col justify-between text-xs text-gray-500 text-right">
-                                 <span>{formatPrice(maxValue)}</span>
-                                 <span>{formatPrice(maxValue * 0.75)}</span>
-                                 <span>{formatPrice(maxValue * 0.5)}</span>
-                                 <span>{formatPrice(maxValue * 0.25)}</span>
-                                 <span>0</span>
-                            </div>
-                         </div>
-                    </div>
-                );
-            };
-
-            return (
-                 <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4">ผลการประหยัดจากการใช้รถ EV ต่อค่าใช้จ่ายน้ำมัน</h2>
-                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                        <SummaryCard title="ค่าใช้จ่ายน้ำมันเฉลี่ย (ก่อนมี EV)" value={formatPrice(impactData.avgBefore)} unit="บาท/เดือน" icon={<Icons name="balance"/>} color={{bg:'bg-gray-100', border:'border-gray-400'}}/>
-                        <SummaryCard title="ค่าพลังงานรวมเฉลี่ย (หลังมี EV)" value={formatPrice(impactData.avgAfter)} unit="บาท/เดือน" icon={<Icons name="balance"/>} color={{bg:'bg-blue-100', border:'border-blue-500'}}/>
-                        <SummaryCard title="ประหยัดขึ้น (เปอร์เซ็นต์)" value={`${formatNumber(impactData.reduction)}%`} unit="" icon={<Icons name="down"/>} color={{bg:'bg-green-100', border:'border-green-500'}}/>
-                        <SummaryCard title="ประหยัดสุทธิ (หลังหักค่าไฟ)" value={formatPrice(impactData.netSavings)} unit="บาท/เดือน" icon={<Icons name="balance"/>} color={{bg:'bg-yellow-100', border:'border-yellow-500'}}/>
-                    </div>
-                    <ImpactLineChart previousYearData={impactData.previousYearData} currentYearData={impactData.currentYearData} />
+                    <MonthlyComparisonLineChart data={comparisonData.monthlyChartData} currentYear={selectedYear} previousYear={selectedYear - 1} />
                 </div>
             );
         };
@@ -2635,7 +3840,7 @@
         // ### MAIN APP COMPONENT (คอมโพเนนต์หลัก) ###
         // ##################################################################
         const App = () => {
-            const [activeApp, setActiveApp] = useState('repair'); // 'repair', 'fuel', 'ev', 'energy', 'ev_impact', 'breakeven'
+            const [activeApp, setActiveApp] = useState('repair'); // 'repair', 'fuel', 'ev', 'energy', 'ev_impact', 'breakeven', 'overview'
             const [data, setData] = useState(null);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
@@ -2723,6 +3928,8 @@
                         return <EVImpactApp fuelData={data.fuelData} evData={data.evData} />;
                     case 'breakeven':
                         return <BreakevenApp repairData={data.repairData} fuelData={data.fuelData} evData={data.evData} />;
+                    case 'overview':
+                        return <OverviewApp repairData={data.repairData} fuelData={data.fuelData} evData={data.evData} />;
                     default:
                         return null;
                 }
@@ -2731,8 +3938,8 @@
             return (
                 <div className="container mx-auto p-4 sm:p-6">
                     <header className="mb-6">
-                        <div className="header-container flex flex-col sm:flex-row justify-between items-center">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">รายงานค่าใช้จ่าย Material handling</h1>
+                        <div className="header-container flex flex-col items-center">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 text-center">รายงานค่าใช้จ่าย Material handling</h1>
                              <button type="button" className="refresh-button" onClick={fetchDataFromScript} disabled={loading}>
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -2767,17 +3974,21 @@
                                     <Icons name="bolt" className="w-6 h-6" />
                                     <span className="nav-text">ชาร์จไฟEV</span>
                                 </button>
-                                <button title="เปรียบเทียบพลังงาน" className={`nav-button ${activeApp === 'energy' ? 'active' : ''}`} onClick={() => setActiveApp('energy')}>
+                                <button title="เปรียบเทียบการใช้น้ำมัน" className={`nav-button ${activeApp === 'energy' ? 'active' : ''}`} onClick={() => setActiveApp('energy')}>
                                     <Icons name="balance" className="w-6 h-6" />
                                     <span className="nav-text">เปรียบเทียบ</span>
                                 </button>
                                 <button title="ผลการประหยัด EV" className={`nav-button ${activeApp === 'ev_impact' ? 'active' : ''}`} onClick={() => setActiveApp('ev_impact')}>
                                      <dotlottie-wc src="https://lottie.host/ddc40909-2718-4242-927f-e3fda3ac77ca/L8DWV25LrA.lottie" style={{width: '24px', height: '24px'}} speed="1" autoplay loop></dotlottie-wc>
-                                    <span className="nav-text">ผลประหยัดEV</span>
+                                    <span className="nav-text">แนวโน้มการใช้น้ำมัน</span>
                                 </button>
                                 <button title="จุดคุ้มทุน EV" className={`nav-button ${activeApp === 'breakeven' ? 'active' : ''}`} onClick={() => setActiveApp('breakeven')}>
                                      <Icons name="calculator" className="w-6 h-6" />
                                     <span className="nav-text">จุดคุ้มทุน EV</span>
+                                </button>
+                                <button title="ภาพรวม" className={`nav-button ${activeApp === 'overview' ? 'active' : ''}`} onClick={() => setActiveApp('overview')}>
+                                    <Icons name="grid" className="w-6 h-6" />
+                                    <span className="nav-text">ภาพรวม</span>
                                 </button>
                             </div>
                         </nav>
